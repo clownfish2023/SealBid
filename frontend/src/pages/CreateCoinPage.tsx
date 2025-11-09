@@ -36,7 +36,7 @@ export default function CreateCoinPage() {
       toast.info('Token creation requires users to deploy a module containing OTW first')
       toast.info('Please refer to documentation for how to create custom tokens')
 
-      // 示例代码（需要实际的 OTW）:
+      // Sample code (requires actual OTW):
       // tx.moveCall({
       //   target: `${PACKAGE_ID}::coin_factory::create_coin`,
       //   arguments: [

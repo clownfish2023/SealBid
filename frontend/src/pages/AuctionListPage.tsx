@@ -29,10 +29,10 @@ export default function AuctionListPage() {
   const loadAuctions = async () => {
     try {
       setIsLoading(true)
-      // 查询所有拍卖对象
-      // 注意：实际应用中需要根据合约实际情况调整查询逻辑
+      // Query all auction objects
+      // Note: Actual implementation needs to adjust query logic based on contract requirements
       
-      // 示例数据（实际应从链上查询）
+      // Sample data (should be queried from chain in production)
       const mockAuctions: Auction[] = [
         {
           id: '0x123...',
@@ -83,7 +83,7 @@ export default function AuctionListPage() {
   })
 
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleString('zh-CN')
+    return new Date(timestamp).toLocaleString()
   }
 
   const getStatusBadge = (auction: Auction) => {
@@ -94,9 +94,9 @@ export default function AuctionListPage() {
       ended: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
     }
     const labels = {
-      upcoming: '即将开始',
-      active: '进行中',
-      ended: '已结束',
+      upcoming: 'Upcoming',
+      active: 'Active',
+      ended: 'Ended',
     }
     return (
       <span className={`px-2 py-1 rounded-full text-xs font-medium ${badges[status]}`}>
@@ -117,14 +117,14 @@ export default function AuctionListPage() {
     <div>
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-          拍卖列表
+          Auction List
         </h1>
         <Link to="/create-auction" className="btn btn-primary">
-          创建拍卖
+          Create Auction
         </Link>
       </div>
 
-      {/* 筛选器 */}
+      {/* Filter */}
       <div className="mb-6 flex space-x-2">
         <button
           className={`px-4 py-2 rounded-lg ${
@@ -134,7 +134,7 @@ export default function AuctionListPage() {
           }`}
           onClick={() => setFilter('all')}
         >
-          全部
+          All
         </button>
         <button
           className={`px-4 py-2 rounded-lg ${
@@ -144,7 +144,7 @@ export default function AuctionListPage() {
           }`}
           onClick={() => setFilter('active')}
         >
-          进行中
+          Active
         </button>
         <button
           className={`px-4 py-2 rounded-lg ${
@@ -154,14 +154,14 @@ export default function AuctionListPage() {
           }`}
           onClick={() => setFilter('ended')}
         >
-          已结束
+          Ended
         </button>
       </div>
 
-      {/* 拍卖列表 */}
+      {/* Auction List */}
       {filteredAuctions.length === 0 ? (
         <div className="card text-center py-12">
-          <p className="text-gray-500 dark:text-gray-400">暂无拍卖</p>
+          <p className="text-gray-500 dark:text-gray-400">No auctions available</p>
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -180,25 +180,25 @@ export default function AuctionListPage() {
 
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">总供应:</span>
+                  <span className="text-gray-600 dark:text-gray-400">Total Supply:</span>
                   <span className="font-medium text-gray-900 dark:text-white">
                     {parseInt(auction.totalSupply).toLocaleString()}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">中标人数:</span>
+                  <span className="text-gray-600 dark:text-gray-400">Winners:</span>
                   <span className="font-medium text-gray-900 dark:text-white">
                     {auction.winnerCount}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">策略:</span>
+                  <span className="text-gray-600 dark:text-gray-400">Strategy:</span>
                   <span className="font-medium text-gray-900 dark:text-white">
                     {STRATEGY_NAMES[auction.strategy as keyof typeof STRATEGY_NAMES]}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">出价数:</span>
+                  <span className="text-gray-600 dark:text-gray-400">Bids:</span>
                   <span className="font-medium text-gray-900 dark:text-white">
                     {auction.bidCount}
                   </span>
@@ -207,8 +207,8 @@ export default function AuctionListPage() {
 
               <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <div className="text-xs text-gray-500 dark:text-gray-400">
-                  <div>开始: {formatDate(auction.startTime)}</div>
-                  <div>结束: {formatDate(auction.endTime)}</div>
+                  <div>Start: {formatDate(auction.startTime)}</div>
+                  <div>End: {formatDate(auction.endTime)}</div>
                 </div>
               </div>
             </Link>

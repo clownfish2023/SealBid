@@ -37,8 +37,8 @@ export default function AuctionDetailPage() {
   const loadAuctionDetail = async () => {
     try {
       setIsLoading(true)
-      // 从链上加载拍卖详情
-      // 示例数据
+      // Load auction details from chain
+      // Sample data
       const mockAuction: AuctionDetail = {
         id: id || '0x123...',
         creator: '0xabc...',
@@ -54,7 +54,7 @@ export default function AuctionDetailPage() {
       setAuction(mockAuction)
     } catch (error) {
       console.error('Failed to load auction:', error)
-      toast.error('加载拍卖详情失败')
+      toast.error('Failed to load auction details')
     } finally {
       setIsLoading(false)
     }
@@ -62,46 +62,46 @@ export default function AuctionDetailPage() {
 
   const handlePlaceBid = async () => {
     if (!auction || !currentAccount) {
-      toast.error('请先连接钱包')
+      toast.error('Please connect wallet first')
       return
     }
 
     if (!bidAmount || !paymentAmount) {
-      toast.error('请填写出价金额和支付金额')
+      toast.error('Please fill in bid amount and payment amount')
       return
     }
 
     const now = Date.now()
     if (now < auction.startTime) {
-      toast.error('拍卖尚未开始')
+      toast.error('Auction has not started yet')
       return
     }
     if (now >= auction.endTime) {
-      toast.error('拍卖已结束')
+      toast.error('Auction has ended')
       return
     }
 
     setIsSubmitting(true)
 
     try {
-      // 1. 使用 Seal 加密出价
-      toast.info('正在加密出价...')
+      // 1. Encrypt bid using Seal
+      toast.info('Encrypting bid...')
       
-      // 实际应用中需要使用 Seal SDK 加密
+      // Actual implementation requires Seal SDK encryption
       // import { SealClient } from '@mysten/seal-sdk'
       // const sealClient = new SealClient({ ... })
       // const keyId = generateKeyId(auction.endTime)
       // const encryptedBid = await sealClient.encrypt(bidAmount, keyId)
       
-      // 这里简化处理，使用模拟的加密数据
+      // Simplified for demo, using mock encrypted data
       const encryptedBidData = new TextEncoder().encode(bidAmount)
 
-      // 2. 提交加密的出价到链上
+      // 2. Submit encrypted bid to chain
       const tx = new Transaction()
 
-      // 分割 SUI 用于支付
+      // Split SUI for payment
       const [coin] = tx.splitCoins(tx.gas, [
-        tx.pure.u64(parseInt(paymentAmount) * 1000000000), // 转换为 MIST
+        tx.pure.u64(parseInt(paymentAmount) * 1000000000), // Convert to MIST
       ])
 
       tx.moveCall({
@@ -112,7 +112,7 @@ export default function AuctionDetailPage() {
           coin,
           tx.object('0x6'), // Clock object
         ],
-        typeArguments: ['YOUR_COIN_TYPE'], // 需要实际的代币类型
+        typeArguments: ['YOUR_COIN_TYPE'], // Requires actual token type
       })
 
       signAndExecute(
@@ -121,19 +121,19 @@ export default function AuctionDetailPage() {
         },
         {
           onSuccess: (result) => {
-            toast.success('出价成功!')
+            toast.success('Bid placed successfully!')
             console.log('Transaction digest:', result.digest)
             setBidAmount('')
             setPaymentAmount('')
             loadAuctionDetail()
           },
           onError: (error) => {
-            toast.error('出价失败: ' + error.message)
+            toast.error('Bid failed: ' + error.message)
           },
         }
       )
     } catch (error: any) {
-      toast.error('出价失败: ' + error.message)
+      toast.error('Bid failed: ' + error.message)
     } finally {
       setIsSubmitting(false)
     }
@@ -160,21 +160,21 @@ export default function AuctionDetailPage() {
         },
         {
           onSuccess: () => {
-            toast.success('拍卖已完成!')
+            toast.success('Auction completed!')
             loadAuctionDetail()
           },
           onError: (error) => {
-            toast.error('操作失败: ' + error.message)
+            toast.error('Operation failed: ' + error.message)
           },
         }
       )
     } catch (error: any) {
-      toast.error('操作失败: ' + error.message)
+      toast.error('Operation failed: ' + error.message)
     }
   }
 
   const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleString('zh-CN')
+    return new Date(timestamp).toLocaleString()
   }
 
   const getTimeRemaining = () => {
@@ -182,13 +182,13 @@ export default function AuctionDetailPage() {
     const now = Date.now()
     if (now < auction.startTime) {
       const diff = auction.startTime - now
-      return `距开始还有 ${Math.floor(diff / 3600000)} 小时 ${Math.floor((diff % 3600000) / 60000)} 分钟`
+      return `Starts in ${Math.floor(diff / 3600000)} hours ${Math.floor((diff % 3600000) / 60000)} minutes`
     }
     if (now < auction.endTime) {
       const diff = auction.endTime - now
-      return `距结束还有 ${Math.floor(diff / 3600000)} 小时 ${Math.floor((diff % 3600000) / 60000)} 分钟`
+      return `Ends in ${Math.floor(diff / 3600000)} hours ${Math.floor((diff % 3600000) / 60000)} minutes`
     }
-    return '已结束'
+    return 'Ended'
   }
 
   if (isLoading) {
@@ -202,7 +202,7 @@ export default function AuctionDetailPage() {
   if (!auction) {
     return (
       <div className="card text-center py-12">
-        <p className="text-gray-500 dark:text-gray-400">拍卖不存在</p>
+        <p className="text-gray-500 dark:text-gray-400">Auction not found</p>
       </div>
     )
   }
@@ -226,7 +226,7 @@ export default function AuctionDetailPage() {
           </div>
           {auction.finalized && (
             <span className="px-3 py-1 bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 rounded-full text-sm font-medium">
-              已完成
+              Completed
             </span>
           )}
         </div>
@@ -234,7 +234,7 @@ export default function AuctionDetailPage() {
         <div className="grid grid-cols-2 gap-6 mb-6">
           <div>
             <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-              总供应量
+              Total Supply
             </h3>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">
               {parseInt(auction.totalSupply).toLocaleString()}
@@ -242,7 +242,7 @@ export default function AuctionDetailPage() {
           </div>
           <div>
             <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-              中标人数
+              Winners
             </h3>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">
               {auction.winnerCount}
@@ -250,7 +250,7 @@ export default function AuctionDetailPage() {
           </div>
           <div>
             <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-              分配策略
+              Distribution Strategy
             </h3>
             <p className="text-lg font-medium text-gray-900 dark:text-white">
               {STRATEGY_NAMES[auction.strategy as keyof typeof STRATEGY_NAMES]}
@@ -258,7 +258,7 @@ export default function AuctionDetailPage() {
           </div>
           <div>
             <h3 className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
-              当前出价数
+              Current Bids
             </h3>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">
               {auction.encryptedBids.length}
@@ -269,13 +269,13 @@ export default function AuctionDetailPage() {
         <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
-              <span className="text-gray-600 dark:text-gray-400">开始时间:</span>
+              <span className="text-gray-600 dark:text-gray-400">Start Time:</span>
               <span className="ml-2 text-gray-900 dark:text-white">
                 {formatDate(auction.startTime)}
               </span>
             </div>
             <div>
-              <span className="text-gray-600 dark:text-gray-400">结束时间:</span>
+              <span className="text-gray-600 dark:text-gray-400">End Time:</span>
               <span className="ml-2 text-gray-900 dark:text-white">
                 {formatDate(auction.endTime)}
               </span>
@@ -284,43 +284,43 @@ export default function AuctionDetailPage() {
         </div>
       </div>
 
-      {/* 出价表单 */}
+      {/* Bid Form */}
       {isActive && (
         <div className="card">
           <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
-            提交出价
+            Submit Bid
           </h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                出价金额（代币数量）
+                Bid Amount (Token Quantity)
               </label>
               <input
                 type="number"
                 className="input"
-                placeholder="输入你愿意支付的代币数量"
+                placeholder="Enter the amount of tokens you are willing to pay"
                 value={bidAmount}
                 onChange={(e) => setBidAmount(e.target.value)}
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                支付金额（SUI）
+                Payment Amount (SUI)
               </label>
               <input
                 type="number"
                 className="input"
-                placeholder="作为保证金的 SUI 数量"
+                placeholder="SUI amount as deposit"
                 value={paymentAmount}
                 onChange={(e) => setPaymentAmount(e.target.value)}
               />
               <p className="text-sm text-gray-500 mt-1">
-                未中标将退还保证金
+                Deposit will be refunded if not selected
               </p>
             </div>
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
               <p className="text-sm text-blue-700 dark:text-blue-300">
-                🔒 你的出价将使用 Seal 时间锁加密，只有在拍卖结束后才会公开。
+                🔒 Your bid will be encrypted with Seal time-lock and will only be revealed after the auction ends.
               </p>
             </div>
             <button
@@ -328,26 +328,26 @@ export default function AuctionDetailPage() {
               className="btn btn-primary w-full"
               disabled={isSubmitting}
             >
-              {isSubmitting ? '提交中...' : '提交出价'}
+              {isSubmitting ? 'Submitting...' : 'Submit Bid'}
             </button>
           </div>
         </div>
       )}
 
-      {/* 完成拍卖按钮 */}
+      {/* Complete Auction Button */}
       {canFinalize && (
         <div className="card mt-6">
           <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
-            拍卖管理
+            Auction Management
           </h2>
           <p className="text-gray-600 dark:text-gray-400 mb-4">
-            拍卖已结束，可以开始解密出价并分配代币。
+            Auction has ended, you can start decrypting bids and distributing tokens.
           </p>
           <button
             onClick={handleFinalizeAuction}
             className="btn btn-primary"
           >
-            完成拍卖并分配代币
+            Complete Auction and Distribute Tokens
           </button>
         </div>
       )}

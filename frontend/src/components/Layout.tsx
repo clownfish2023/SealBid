@@ -40,6 +40,14 @@ export default function Layout() {
                   Create Token
                 </Link>
                 <Link
+                  to="/create-project"
+                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive(
+                    '/create-project'
+                  )}`}
+                >
+                  Create Project
+                </Link>
+                <Link
                   to="/create-auction"
                   className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive(
                     '/create-auction'
@@ -53,7 +61,15 @@ export default function Layout() {
                     '/auctions'
                   )}`}
                 >
-                  Auction List
+                  Auctions
+                </Link>
+                <Link
+                  to="/history"
+                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive(
+                    '/history'
+                  )}`}
+                >
+                  History
                 </Link>
               </div>
             </div>
@@ -73,7 +89,7 @@ export default function Layout() {
       <footer className="bg-white dark:bg-gray-800 mt-12">
         <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
           <p className="text-center text-gray-500 text-sm">
-            © 2024 SealBid. Privacy auction platform based on Sui Seal
+            © 2024 SealBid. Privacy auction platform powered by Sui Seal + Walrus Storage
           </p>
         </div>
       </footer>

@@ -25,7 +25,7 @@ export default function CreateAuctionPage() {
     if (!formData.coinType || !formData.coinName || !formData.totalSupply || 
         !formData.winnerCount || !formData.startTime || !formData.endTime ||
         !formData.treasuryCapId) {
-      toast.error('请填写所有必填字段')
+      toast.error('Please fill in all required fields')
       return
     }
 
@@ -33,12 +33,12 @@ export default function CreateAuctionPage() {
     const endTimeMs = new Date(formData.endTime).getTime()
 
     if (startTimeMs >= endTimeMs) {
-      toast.error('结束时间必须晚于开始时间')
+      toast.error('End time must be later than start time')
       return
     }
 
     if (endTimeMs <= Date.now()) {
-      toast.error('结束时间必须晚于当前时间')
+      toast.error('End time must be later than current time')
       return
     }
 
@@ -67,9 +67,9 @@ export default function CreateAuctionPage() {
         },
         {
           onSuccess: (result) => {
-            toast.success('拍卖创建成功!')
+            toast.success('Auction created successfully!')
             console.log('Transaction digest:', result.digest)
-            // 重置表单
+            // Reset form
             setFormData({
               coinType: '',
               coinName: '',
@@ -82,25 +82,25 @@ export default function CreateAuctionPage() {
             })
           },
           onError: (error) => {
-            toast.error('创建失败: ' + error.message)
+            toast.error('Creation failed: ' + error.message)
           },
         }
       )
     } catch (error: any) {
-      toast.error('创建失败: ' + error.message)
+      toast.error('Creation failed: ' + error.message)
     } finally {
       setIsLoading(false)
     }
   }
 
-  // 获取最小开始时间（当前时间）
+  // Get minimum start time (current time)
   const getMinStartTime = () => {
     const now = new Date()
-    now.setMinutes(now.getMinutes() + 5) // 至少5分钟后
+    now.setMinutes(now.getMinutes() + 5) // At least 5 minutes later
     return now.toISOString().slice(0, 16)
   }
 
-  // 获取最小结束时间（开始时间后至少1小时）
+  // Get minimum end time (at least 1 hour after start time)
   const getMinEndTime = () => {
     if (!formData.startTime) return getMinStartTime()
     const start = new Date(formData.startTime)
@@ -112,13 +112,13 @@ export default function CreateAuctionPage() {
     <div className="max-w-2xl mx-auto">
       <div className="card">
         <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
-          创建拍卖
+          Create Auction
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              代币类型 *
+              Token Type *
             </label>
             <input
               type="text"
@@ -129,13 +129,13 @@ export default function CreateAuctionPage() {
               required
             />
             <p className="text-sm text-gray-500 mt-1">
-              完整的代币类型标识符
+              Complete token type identifier
             </p>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              代币名称 *
+              Token Name *
             </label>
             <input
               type="text"
@@ -149,7 +149,7 @@ export default function CreateAuctionPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              TreasuryCap 对象 ID *
+              TreasuryCap Object ID *
             </label>
             <input
               type="text"
@@ -160,14 +160,14 @@ export default function CreateAuctionPage() {
               required
             />
             <p className="text-sm text-gray-500 mt-1">
-              用于铸造代币的 TreasuryCap 对象 ID
+              TreasuryCap object ID used for minting tokens
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                总供应量 *
+                Total Supply *
               </label>
               <input
                 type="number"
@@ -182,7 +182,7 @@ export default function CreateAuctionPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                中标人数 *
+                Number of Winners *
               </label>
               <input
                 type="number"
@@ -198,7 +198,7 @@ export default function CreateAuctionPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              分配策略 *
+              Allocation Strategy *
             </label>
             <select
               className="input"
@@ -221,7 +221,7 @@ export default function CreateAuctionPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                开始时间 *
+                Start Time *
               </label>
               <input
                 type="datetime-local"
@@ -235,7 +235,7 @@ export default function CreateAuctionPage() {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                结束时间 *
+                End Time *
               </label>
               <input
                 type="datetime-local"
@@ -250,12 +250,12 @@ export default function CreateAuctionPage() {
 
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
             <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
-              💡 提示
+              💡 Tips
             </h3>
             <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
-              <li>• 所有出价将使用 Seal 时间锁加密</li>
-              <li>• 只有在结束时间后才能解密查看</li>
-              <li>• 请确保有足够的代币供应量用于分配</li>
+              <li>• All bids will be encrypted using Seal time-lock</li>
+              <li>• Can only be decrypted and viewed after end time</li>
+              <li>• Please ensure sufficient token supply for allocation</li>
             </ul>
           </div>
 
@@ -264,7 +264,7 @@ export default function CreateAuctionPage() {
             className="btn btn-primary w-full"
             disabled={isLoading}
           >
-            {isLoading ? '创建中...' : '创建拍卖'}
+            {isLoading ? 'Creating...' : 'Create Auction'}
           </button>
         </form>
       </div>

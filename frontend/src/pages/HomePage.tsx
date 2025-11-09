@@ -1,172 +1,213 @@
 import { Link } from 'react-router-dom'
+import { LockClosedIcon, ClockIcon, ShieldCheckIcon, CubeIcon } from '@heroicons/react/24/outline'
 
 export default function HomePage() {
   return (
-    <div className="px-4 py-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8 lg:py-20">
+    <div>
       {/* Hero Section */}
-      <div className="max-w-xl mb-10 md:mx-auto text-center lg:max-w-2xl md:mb-12">
-        <h1 className="max-w-lg mb-6 font-sans text-3xl font-bold leading-none tracking-tight text-gray-900 dark:text-white sm:text-4xl md:mx-auto">
-          Privacy Token Auction Platform
+      <div className="text-center mb-16">
+        <h1 className="text-5xl font-bold text-gray-900 dark:text-white mb-4">
+          SealBid
         </h1>
-        <p className="text-base text-gray-700 dark:text-gray-300 md:text-lg">
-          Based on Sui Seal time-lock encryption technology, enabling fair and transparent blind auctions.
-          All bids remain encrypted until the auction ends, ensuring fairness in the bidding process.
+        <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
+          Privacy-Preserving Token Auction Platform on Sui
         </p>
+        <p className="text-lg text-gray-500 dark:text-gray-500 mb-8 max-w-3xl mx-auto">
+          Using Seal's time-lock encryption and Walrus decentralized storage, 
+          create and participate in fully private token auctions with multiple allocation strategies
+        </p>
+        <div className="flex justify-center space-x-4">
+          <Link to="/create-project" className="btn btn-primary">
+            Create Project
+          </Link>
+          <Link to="/create-auction" className="btn btn-secondary">
+            Create Auction
+          </Link>
+          <Link to="/auctions" className="btn bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600">
+            Browse Auctions
+          </Link>
+        </div>
       </div>
 
       {/* Features */}
-      <div className="grid gap-8 row-gap-10 lg:grid-cols-3 mb-16">
-        <div className="card">
-          <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-primary-100 dark:bg-primary-900">
-            <svg
-              className="w-6 h-6 text-primary-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-              />
-            </svg>
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div className="card text-center">
+          <div className="flex justify-center mb-4">
+            <LockClosedIcon className="h-12 w-12 text-primary-600" />
           </div>
-          <h3 className="mb-2 font-semibold leading-5 text-gray-900 dark:text-white">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            Privacy Protection
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400">
+            Bids are encrypted with Seal time-lock, only revealed after auction ends
+          </p>
+        </div>
+
+        <div className="card text-center">
+          <div className="flex justify-center mb-4">
+            <ClockIcon className="h-12 w-12 text-primary-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
             Time-Lock Encryption
           </h3>
-          <p className="text-sm text-gray-700 dark:text-gray-300">
-            Using Seal technology, bids remain fully encrypted until auction ends and can only be decrypted after the specified time.
+          <p className="text-gray-600 dark:text-gray-400">
+            Leveraging Seal's time-lock mechanism, ensuring fairness
           </p>
         </div>
 
-        <div className="card">
-          <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-primary-100 dark:bg-primary-900">
-            <svg
-              className="w-6 h-6 text-primary-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+        <div className="card text-center">
+          <div className="flex justify-center mb-4">
+            <ShieldCheckIcon className="h-12 w-12 text-primary-600" />
           </div>
-          <h3 className="mb-2 font-semibold leading-5 text-gray-900 dark:text-white">
-            Fair Bidding
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            Multiple Strategies
           </h3>
-          <p className="text-sm text-gray-700 dark:text-gray-300">
-            Supports multiple allocation strategies: highest price, random selection, closest to average, ensuring fair bidding.
+          <p className="text-gray-600 dark:text-gray-400">
+            Top N, Random N, or Closest to Average allocation strategies
           </p>
         </div>
 
-        <div className="card">
-          <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-primary-100 dark:bg-primary-900">
-            <svg
-              className="w-6 h-6 text-primary-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
-            </svg>
+        <div className="card text-center">
+          <div className="flex justify-center mb-4">
+            <CubeIcon className="h-12 w-12 text-primary-600" />
           </div>
-          <h3 className="mb-2 font-semibold leading-5 text-gray-900 dark:text-white">
-            One-Click Token Creation
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            Walrus Storage
           </h3>
-          <p className="text-sm text-gray-700 dark:text-gray-300">
-            Easily create custom tokens with name, symbol, logo settings, quickly start auctions.
+          <p className="text-gray-600 dark:text-gray-400">
+            Project assets and history stored on Walrus, permanent and low-cost
           </p>
         </div>
       </div>
 
-      {/* CTA Buttons */}
-      <div className="flex flex-col items-center space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 sm:justify-center">
-        <Link
-          to="/create-coin"
-          className="btn btn-primary w-full sm:w-auto text-center"
-        >
-          Create Token
-        </Link>
-        <Link
-          to="/create-auction"
-          className="btn btn-secondary w-full sm:w-auto text-center"
-        >
-          Create Auction
-        </Link>
-        <Link
-          to="/auctions"
-          className="btn bg-gray-200 hover:bg-gray-300 text-gray-800 w-full sm:w-auto text-center"
-        >
-          Browse Auctions
-        </Link>
-      </div>
-
-      {/* How it works */}
-      <div className="mt-20">
-        <h2 className="text-3xl font-bold text-center mb-12 text-gray-900 dark:text-white">
+      {/* How It Works */}
+      <div className="card mb-8">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 text-center">
           How It Works
         </h2>
-        <div className="grid gap-8 lg:grid-cols-4">
-          <div className="text-center">
-            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-primary-600 text-white text-2xl font-bold">
+        
+        <div className="space-y-8">
+          {/* Step 1 */}
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0 w-10 h-10 bg-primary-600 text-white rounded-full flex items-center justify-center font-bold">
               1
             </div>
-            <h3 className="mb-2 font-semibold text-gray-900 dark:text-white">
-              Create Token
-            </h3>
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              Set basic token information including name, symbol, precision and logo
-            </p>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Create Project
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Upload project materials (logo, whitepaper, video) to Walrus storage, 
+                create on-chain metadata with references to stored assets
+              </p>
+            </div>
           </div>
 
-          <div className="text-center">
-            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-primary-600 text-white text-2xl font-bold">
+          {/* Step 2 */}
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0 w-10 h-10 bg-primary-600 text-white rounded-full flex items-center justify-center font-bold">
               2
             </div>
-            <h3 className="mb-2 font-semibold text-gray-900 dark:text-white">
-              Create Auction
-            </h3>
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              Select token, set auction time, share quantity and allocation strategy
-            </p>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Create Auction
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Set auction parameters: total supply, winner count, allocation strategy, 
+                and time window. Link to your project metadata
+              </p>
+            </div>
           </div>
 
-          <div className="text-center">
-            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-primary-600 text-white text-2xl font-bold">
+          {/* Step 3 */}
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0 w-10 h-10 bg-primary-600 text-white rounded-full flex items-center justify-center font-bold">
               3
             </div>
-            <h3 className="mb-2 font-semibold text-gray-900 dark:text-white">
-              Encrypt Bids
-            </h3>
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              Users encrypt bids with Seal, maintaining privacy until deadline
-            </p>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Submit Encrypted Bids
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Users submit bids encrypted with Seal time-lock. Bids remain private 
+                until auction ends. Deposit is required and refunded if not selected
+              </p>
+            </div>
           </div>
 
-          <div className="text-center">
-            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 rounded-full bg-primary-600 text-white text-2xl font-bold">
+          {/* Step 4 */}
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0 w-10 h-10 bg-primary-600 text-white rounded-full flex items-center justify-center font-bold">
               4
             </div>
-            <h3 className="mb-2 font-semibold text-gray-900 dark:text-white">
-              Auto Allocation
-            </h3>
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              After auction ends, decrypt bids and automatically allocate tokens according to strategy
-            </p>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Reveal & Distribute
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                After deadline, Seal automatically enables decryption. Creator finalizes 
+                auction, selects winners based on strategy, and distributes tokens
+              </p>
+            </div>
+          </div>
+
+          {/* Step 5 */}
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0 w-10 h-10 bg-primary-600 text-white rounded-full flex items-center justify-center font-bold">
+              5
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Archive History
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Complete auction data (bids, winners, statistics) is archived to Walrus 
+                for permanent, low-cost storage and future reference
+              </p>
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* Tech Highlights */}
+      <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className="card">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            🔐 Seal Time-Lock Encryption
+          </h3>
+          <ul className="space-y-2 text-gray-600 dark:text-gray-400">
+            <li>• Bids encrypted to specific future time</li>
+            <li>• Automatic decryption after deadline</li>
+            <li>• No trusted third party needed</li>
+            <li>• Provably fair and transparent</li>
+          </ul>
+        </div>
+
+        <div className="card">
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            📦 Walrus Decentralized Storage
+          </h3>
+          <ul className="space-y-2 text-gray-600 dark:text-gray-400">
+            <li>• 99% cheaper than on-chain storage</li>
+            <li>• Permanent and censorship-resistant</li>
+            <li>• CDN-accelerated access worldwide</li>
+            <li>• Perfect for media and documents</li>
+          </ul>
+        </div>
+      </div>
+
+      {/* CTA */}
+      <div className="card text-center bg-gradient-to-r from-primary-600 to-primary-700 text-white">
+        <h2 className="text-3xl font-bold mb-4">
+          Ready to Launch Your Token?
+        </h2>
+        <p className="text-lg mb-6 opacity-90">
+          Create a privacy-preserving auction in minutes
+        </p>
+        <Link to="/create-project" className="btn bg-white text-primary-600 hover:bg-gray-100">
+          Get Started Now
+        </Link>
       </div>
     </div>
   )
 }
-
