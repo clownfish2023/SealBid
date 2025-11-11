@@ -286,7 +286,7 @@ export default function AuctionHistoryPage() {
                     className="btn bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 text-sm"
                     onClick={async () => {
                       // Download detailed history from Walrus
-                      toast.info('Loading detailed history...')
+                      toast('Loading detailed history...', { icon: '📊' })
                       // const history = await historyManager.loadAuctionHistory(summaryBlobId)
                     }}
                   >

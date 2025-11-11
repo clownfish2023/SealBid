@@ -2,6 +2,10 @@
 export const PACKAGE_ID = import.meta.env.VITE_PACKAGE_ID || '0x0'
 export const SEAL_PACKAGE_ID = '0x927a54e9ae803f82ebf480136a9bcff45101ccbe28b13f433c89f5181069d682'
 
+// Coin Registry ID (Shared object created during coin_factory module initialization)
+// To get this: Deploy coin_factory module and check "Shared Objects" in deployment output
+export const COIN_REGISTRY_ID = import.meta.env.VITE_COIN_REGISTRY_ID || '0x0'
+
 // Seal server configuration
 export const SEAL_SERVERS = [
   '0x73d05d62c18d9374e3ea529e8e0ed6161da1a141a94d3f76ae3fe4e99356db75',

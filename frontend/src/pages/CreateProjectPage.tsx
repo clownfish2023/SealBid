@@ -46,6 +46,7 @@ export default function CreateProjectPage() {
     try {
       // Step 1: Upload files to Walrus
       setUploadProgress('Uploading files to Walrus...')
+      toast('Uploading files to Walrus...', { icon: '📤' })
       
       const uploadResult = await metadataManager.uploadProjectMetadata({
         metadata: formData,

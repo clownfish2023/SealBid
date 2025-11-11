@@ -105,7 +105,7 @@ export default function EnhancedAuctionDetailPage() {
     setIsSubmitting(true)
 
     try {
-      toast.info('Encrypting bid with Seal...')
+      toast('Encrypting bid with Seal...', { icon: '🔒' })
       
       // Encrypt bid data
       const encryptedBidData = new TextEncoder().encode(bidAmount)
