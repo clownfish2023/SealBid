@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit'
-import { Transaction } from '@mysten/sui/transactions'
+// import { useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit'
+// import { Transaction } from '@mysten/sui/transactions'
 import toast from 'react-hot-toast'
-import { PACKAGE_ID } from '@/config/constants'
+// import { PACKAGE_ID } from '@/config/constants'
 
 export default function CreateCoinPage() {
   const [formData, setFormData] = useState({
@@ -14,8 +14,8 @@ export default function CreateCoinPage() {
   })
   const [isLoading, setIsLoading] = useState(false)
 
-  const { mutate: signAndExecute } = useSignAndExecuteTransaction()
-  const suiClient = useSuiClient()
+  // const { mutate: signAndExecute } = useSignAndExecuteTransaction()
+  // const suiClient = useSuiClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -28,13 +28,13 @@ export default function CreateCoinPage() {
     setIsLoading(true)
 
     try {
-      const tx = new Transaction()
+      // const tx = new Transaction()
       
       // Note: Actual usage requires users to provide their own OTW (One-Time-Witness)
       // This is simplified here, users should deploy a module containing OTW first
       
-      toast.info('Token creation requires users to deploy a module containing OTW first')
-      toast.info('Please refer to documentation for how to create custom tokens')
+      toast('Token creation requires users to deploy a module containing OTW first')
+      toast('Please refer to documentation for how to create custom tokens')
 
       // Sample code (requires actual OTW):
       // tx.moveCall({

@@ -4,7 +4,8 @@ import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@
 import { Transaction } from '@mysten/sui/transactions'
 import toast from 'react-hot-toast'
 import { PACKAGE_ID } from '@/config/constants'
-import { createWalrusClient, createProjectMetadataManager } from '@/utils/walrus-client'
+import { createWalrusClient } from '@/utils/walrus-client'
+// import { createProjectMetadataManager } from '@/utils/metadata-manager'
 
 interface ProjectMetadata {
   name: string
@@ -46,7 +47,7 @@ export default function EnhancedAuctionDetailPage() {
   const { mutate: signAndExecute } = useSignAndExecuteTransaction()
   const suiClient = useSuiClient()
   const walrusClient = createWalrusClient()
-  const metadataManager = createProjectMetadataManager()
+  // const metadataManager = createProjectMetadataManager()
 
   const refreshAuction = () => {
     setRefreshKey(prev => prev + 1)
@@ -225,7 +226,7 @@ export default function EnhancedAuctionDetailPage() {
       })
 
       signAndExecute(
-        { transaction: tx },
+        { transaction: tx as any },
         {
           onSuccess: (result) => {
             toast.success('Bid placed successfully!')
@@ -262,7 +263,7 @@ export default function EnhancedAuctionDetailPage() {
       })
 
       signAndExecute(
-        { transaction: tx },
+        { transaction: tx as any },
         {
           onSuccess: () => {
             toast.success('Auction completed!')

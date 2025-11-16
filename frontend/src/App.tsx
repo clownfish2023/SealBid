@@ -6,7 +6,7 @@ import CreateCoinPage from './pages/CreateCoinPage'
 import CreateProjectPage from './pages/CreateProjectPage'
 import CreateAuctionPage from './pages/CreateAuctionPage'
 import AuctionListPage from './pages/AuctionListPage'
-import AuctionDetailPage from './pages/AuctionDetailPage'
+// import AuctionDetailPage from './pages/AuctionDetailPage'
 import EnhancedAuctionDetailPage from './pages/EnhancedAuctionDetailPage'
 import AuctionHistoryPage from './pages/AuctionHistoryPage'
 

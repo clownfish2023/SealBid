@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useSuiClient } from '@mysten/dapp-kit'
-import { createAuctionHistoryManager, createWalrusClient } from '@/utils/walrus-client'
+// import { useSuiClient } from '@mysten/dapp-kit'
+// import { createAuctionHistoryManager, createWalrusClient } from '@/utils/walrus-client'
 import { Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 
@@ -29,9 +29,9 @@ export default function AuctionHistoryPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [filter, setFilter] = useState<'all' | '30d' | '7d'>('all')
 
-  const suiClient = useSuiClient()
-  const historyManager = createAuctionHistoryManager()
-  const walrusClient = createWalrusClient()
+  // const suiClient = useSuiClient()
+  // const historyManager = createAuctionHistoryManager()
+  // const walrusClient = createWalrusClient()
 
   useEffect(() => {
     loadHistories()

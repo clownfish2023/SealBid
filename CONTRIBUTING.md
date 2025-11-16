@@ -1,134 +1,134 @@
-# 贡献指南
+# Contributing Guidelines
 
-感谢你对 SealBid 项目的关注！我们欢迎各种形式的贡献。
+Thank you for your interest in the SealBid project! We welcome contributions in all forms.
 
-## 🤝 贡献方式
+## 🤝 How to Contribute
 
-### 报告 Bug
+### Reporting Bugs
 
-如果你发现了 bug，请创建一个 Issue 并包含以下信息：
+If you find a bug, please create an Issue and include the following information:
 
-- Bug 的详细描述
-- 复现步骤
-- 预期行为
-- 实际行为
-- 环境信息（操作系统、浏览器、Sui 版本等）
-- 截图（如果适用）
+- Detailed bug description
+- Steps to reproduce
+- Expected behavior
+- Actual behavior
+- Environment information (OS, browser, Sui version, etc.)
+- Screenshots (if applicable)
 
-### 提出新功能
+### Suggesting New Features
 
-我们欢迎新功能建议！请创建一个 Issue 描述：
+We welcome new feature suggestions! Please create an Issue describing:
 
-- 功能的目的和用途
-- 预期的行为
-- 可能的实现方案
-- 是否愿意自己实现
+- Purpose and use case of the feature
+- Expected behavior
+- Possible implementation approaches
+- Whether you're willing to implement it yourself
 
-### 提交代码
+### Submitting Code
 
-1. **Fork 项目**
+1. **Fork the Project**
 
 ```bash
-# 点击 GitHub 上的 Fork 按钮
-# 克隆你的 fork
-git clone https://github.com/YOUR_USERNAME/SealBid.git
+# Click the Fork button on GitHub
+# Clone your fork
+git clone https://github.com/your-username/SealBid.git
 cd SealBid
 ```
 
-2. **创建分支**
+2. **Create a Branch**
 
 ```bash
-# 创建功能分支
-git checkout -b feature/your-feature-name
+# Create feature branch
+git checkout -b feature/feature-name
 
-# 或者修复分支
+# Or bug fix branch
 git checkout -b fix/issue-number
 ```
 
-3. **编写代码**
+3. **Write Code**
 
-- 遵循项目的代码风格
-- 添加必要的注释
-- 编写或更新测试
-- 更新相关文档
+- Follow project coding style
+- Add necessary comments
+- Write or update tests
+- Update relevant documentation
 
-4. **测试**
+4. **Testing**
 
 ```bash
-# 测试 Move 合约
+# Test Move contracts
 cd move
 sui move test
 
-# 测试前端
+# Test frontend
 cd frontend
 npm run lint
 npm run build
 ```
 
-5. **提交**
+5. **Commit**
 
 ```bash
 git add .
-git commit -m "描述你的更改"
-git push origin feature/your-feature-name
+git commit -m "Describe your changes"
+git push origin feature/feature-name
 ```
 
-6. **创建 Pull Request**
+6. **Create Pull Request**
 
-- 在 GitHub 上创建 PR
-- 填写 PR 模板
-- 等待审核
+- Create PR on GitHub
+- Fill out PR template
+- Wait for review
 
-## 📝 代码规范
+## 📝 Code Standards
 
-### Move 代码规范
+### Move Code Standards
 
 ```move
-// 1. 模块注释
-/// 模块描述
+// 1. Module comments
+/// Module description
 
-// 2. 常量使用大写
+// 2. Use uppercase for constants
 const EErrorCode: u64 = 1;
 
-// 3. 函数注释
-/// 函数功能描述
-/// 参数说明
-/// 返回值说明
+// 3. Function comments
+/// Function purpose description
+/// Parameter descriptions
+/// Return value descriptions
 
-// 4. 使用有意义的变量名
+// 4. Use meaningful variable names
 let total_supply = 1000000;  // ✅
 let ts = 1000000;            // ❌
 
-// 5. 错误处理
+// 5. Error handling
 assert!(condition, EErrorCode);
 ```
 
-### TypeScript 代码规范
+### TypeScript Code Standards
 
 ```typescript
-// 1. 使用 TypeScript 类型
+// 1. Use TypeScript types
 interface User {
   address: string
   balance: number
 }
 
-// 2. 使用有意义的函数名
+// 2. Use meaningful function names
 function formatTokenAmount(amount: string): string  // ✅
 function fmt(a: string): string                    // ❌
 
-// 3. 使用 const 和 let，避免 var
+// 3. Use const and let, avoid var
 const packageId = '0x...'  // ✅
 var pkgId = '0x...'        // ❌
 
-// 4. 组件使用 PascalCase
+// 4. Use PascalCase for components
 export default function AuctionCard() {}  // ✅
 export default function auction_card() {} // ❌
 
-// 5. 使用箭头函数
+// 5. Use arrow functions
 const handleClick = () => {}  // ✅
 ```
 
-### Git 提交信息规范
+### Git Commit Message Standards
 
 ```
 <type>(<scope>): <subject>
@@ -138,16 +138,16 @@ const handleClick = () => {}  // ✅
 <footer>
 ```
 
-类型（type）：
-- `feat`: 新功能
-- `fix`: 修复 bug
-- `docs`: 文档更新
-- `style`: 代码格式（不影响代码运行）
-- `refactor`: 重构
-- `test`: 测试相关
-- `chore`: 构建过程或辅助工具的变动
+Types:
+- `feat`: new feature
+- `fix`: bug fix
+- `docs`: documentation update
+- `style`: code formatting (doesn't affect code execution)
+- `refactor`: refactoring
+- `test`: test-related
+- `chore`: build process or auxiliary tool changes
 
-示例：
+Example:
 ```
 feat(auction): add random selection strategy
 
@@ -157,82 +157,82 @@ The strategy uses blockchain timestamp as seed for randomness.
 Closes #123
 ```
 
-## 🧪 测试指南
+## 🧪 Testing Guide
 
-### Move 合约测试
+### Move Contract Tests
 
 ```bash
 cd move
 
-# 运行所有测试
+# Run all tests
 sui move test
 
-# 运行特定测试
+# Run specific tests
 sui move test --filter auction_tests
 
-# 显示详细输出
+# Show detailed output
 sui move test -v
 ```
 
-### 前端测试
+### Frontend Tests
 
 ```bash
 cd frontend
 
-# Lint 检查
+# Lint check
 npm run lint
 
-# 类型检查
+# Type check
 npm run type-check
 
-# 构建测试
+# Build test
 npm run build
 ```
 
-## 📚 文档指南
+## 📚 Documentation Guide
 
-- 所有新功能都应该更新文档
-- 使用清晰的中文描述
-- 提供代码示例
-- 更新 README.md 中的相关部分
+- All new features should update documentation
+- Use clear English descriptions
+- Provide code examples
+- Update relevant sections in README.md
 
-## 🔍 代码审查流程
+## 🔍 Code Review Process
 
-1. 自动化检查通过
-2. 至少一位维护者审查
-3. 解决所有评论
-4. 测试通过
-5. 合并到主分支
+1. Automated checks pass
+2. At least one maintainer review
+3. Address all comments
+4. Tests pass
+5. Merge to main branch
 
-## ❓ 需要帮助？
+## ❓ Need Help?
 
-- 查看 [README.md](README.md)
-- 查看 [文档](docs/)
-- 在 Issue 中提问
-- 加入讨论
+- Check [README.md](README.md)
+- Check [documentation](docs/)
+- Ask questions in Issues
+- Join discussions
 
-## 📜 行为准则
+## 📜 Code of Conduct
 
-- 尊重所有贡献者
-- 保持友善和专业
-- 接受建设性批评
-- 关注对项目最有利的事情
+- Respect all contributors
+- Be friendly and professional
+- Accept constructive criticism
+- Focus on what's best for the project
 
-## 🎯 优先级
+## 🎯 Priorities
 
-当前优先级较高的任务：
+Current high-priority tasks:
 
-1. [ ] 完善 Seal SDK 集成
-2. [ ] 添加更多测试用例
-3. [ ] 优化 Gas 使用
-4. [ ] 改进 UI/UX
-5. [ ] 添加更多拍卖策略
+1. [ ] Improve Seal SDK integration
+2. [ ] Add more test cases
+3. [ ] Optimize Gas usage
+4. [ ] Improve UI/UX
+5. [ ] Add more auction strategies
 
-## 🏆 贡献者
+## 🏆 Contributors
 
-感谢所有贡献者的付出！
+Thank you to all contributors!
 
 ---
 
-再次感谢你的贡献！🎉
+Thanks again for your contribution! 🎉
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useSignAndExecuteTransaction, useCurrentAccount } from '@mysten/dapp-kit'
 import { Transaction } from '@mysten/sui/transactions'
 import toast from 'react-hot-toast'
@@ -120,7 +120,7 @@ export default function CreateAuctionPage() {
 
       signAndExecute(
         {
-          transaction: tx,
+          transaction: tx as any,
         },
         {
           onSuccess: (result) => {
@@ -350,7 +350,7 @@ export default function CreateAuctionPage() {
             <select
               className="input"
               value={formData.strategy}
-              onChange={(e) => setFormData({ ...formData, strategy: parseInt(e.target.value) })}
+              onChange={(e) => setFormData({ ...formData, strategy: parseInt(e.target.value) as any })}
               required
             >
               <option value={AUCTION_STRATEGIES.TOP_N}>

@@ -92,7 +92,7 @@ export default function CreateProjectPage() {
       // Execute transaction and get metadata ID
       const result = await new Promise<string>((resolve, reject) => {
         signAndExecute(
-          { transaction: tx },
+          { transaction: tx as any },
           {
             onSuccess: async (result) => {
               console.log('Transaction successful:', result.digest)
@@ -186,7 +186,7 @@ export default function CreateProjectPage() {
 
       await new Promise<void>((resolve, reject) => {
         signAndExecute(
-          { transaction: updateTx },
+          { transaction: updateTx as any },
           {
             onSuccess: () => {
               toast.success('Project created successfully!')

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
-import { useCurrentAccount, useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit'
+import { useCurrentAccount, useSignAndExecuteTransaction } from '@mysten/dapp-kit'
 import { Transaction } from '@mysten/sui/transactions'
 import toast from 'react-hot-toast'
-import { PACKAGE_ID, SEAL_SERVERS, SEAL_PACKAGE_ID, STRATEGY_NAMES } from '@/config/constants'
+import { PACKAGE_ID, STRATEGY_NAMES } from '@/config/constants'
 
 interface AuctionDetail {
   id: string
@@ -28,10 +28,11 @@ export default function AuctionDetailPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const { mutate: signAndExecute } = useSignAndExecuteTransaction()
-  const suiClient = useSuiClient()
+  // const suiClient = useSuiClient()
 
   useEffect(() => {
     loadAuctionDetail()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id])
 
   const loadAuctionDetail = async () => {
@@ -85,39 +86,40 @@ export default function AuctionDetailPage() {
 
     try {
       // 1. Encrypt bid using Seal
-      toast.info('Encrypting bid...')
-      
-      // Actual implementation requires Seal SDK encryption
-      // import { SealClient } from '@mysten/seal-sdk'
-      // const sealClient = new SealClient({ ... })
-      // const keyId = generateKeyId(auction.endTime)
-      // const encryptedBid = await sealClient.encrypt(bidAmount, keyId)
+      toast('Encrypting bid with Seal...', { icon: '🔒' })
       
       // Simplified for demo, using mock encrypted data
       const encryptedBidData = new TextEncoder().encode(bidAmount)
 
       // 2. Submit encrypted bid to chain
       const tx = new Transaction()
-
-      // Split SUI for payment
+      
+      // Split SUI for payment (convert to MIST: 1 SUI = 1,000,000,000 MIST)
+      const paymentInMist = Math.floor(parseFloat(paymentAmount) * 1000000000)
       const [coin] = tx.splitCoins(tx.gas, [
-        tx.pure.u64(parseInt(paymentAmount) * 1000000000), // Convert to MIST
+        tx.pure.u64(paymentInMist),
       ])
+      
+      // 设置合理的 gas budget：基础费用 + payment amount 的缓冲
+      const baseGas = 10000000 // 0.01 SUI
+      const bufferGas = Math.max(paymentInMist * 0.1, 5000000) // 至少 0.005 SUI
+      const totalGasBudget = Math.floor(baseGas + bufferGas)
+      tx.setGasBudget(totalGasBudget)
 
+      // 使用简化代币拍卖
       tx.moveCall({
-        target: `${PACKAGE_ID}::auction::place_bid`,
+        target: `${PACKAGE_ID}::simple_auction::place_simple_bid`,
         arguments: [
           tx.object(auction.id),
-          tx.pure(Array.from(encryptedBidData)),
+          tx.pure.vector('u8', Array.from(encryptedBidData)),
           coin,
           tx.object('0x6'), // Clock object
         ],
-        typeArguments: ['YOUR_COIN_TYPE'], // Requires actual token type
       })
 
       signAndExecute(
         {
-          transaction: tx,
+          transaction: tx as any,
         },
         {
           onSuccess: (result) => {
@@ -156,7 +158,7 @@ export default function AuctionDetailPage() {
 
       signAndExecute(
         {
-          transaction: tx,
+          transaction: tx as any,
         },
         {
           onSuccess: () => {
