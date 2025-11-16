@@ -1,77 +1,88 @@
 import { useState } from 'react'
-// import { useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit'
-// import { Transaction } from '@mysten/sui/transactions'
+import { useSignAndExecuteTransaction, useCurrentAccount } from '@mysten/dapp-kit'
+import { Transaction } from '@mysten/sui/transactions'
 import toast from 'react-hot-toast'
-// import { PACKAGE_ID } from '@/config/constants'
+import { PACKAGE_ID, COIN_REGISTRY_ID } from '@/config/constants'
 
 export default function CreateCoinPage() {
+  const currentAccount = useCurrentAccount()
   const [formData, setFormData] = useState({
     name: '',
     symbol: '',
     decimals: 9,
+    totalSupply: '',
+    mintable: false,
     description: '',
     iconUrl: '',
   })
   const [isLoading, setIsLoading] = useState(false)
 
-  // const { mutate: signAndExecute } = useSignAndExecuteTransaction()
-  // const suiClient = useSuiClient()
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    if (!formData.name || !formData.symbol) {
+    if (!currentAccount?.address) {
+      toast.error('Please connect wallet first')
+      return
+    }
+
+    if (!formData.name || !formData.symbol || !formData.totalSupply) {
       toast.error('Please fill in required fields')
+      return
+    }
+
+    const totalSupply = parseInt(formData.totalSupply)
+    if (isNaN(totalSupply) || totalSupply <= 0) {
+      toast.error('Total supply must be greater than 0')
       return
     }
 
     setIsLoading(true)
 
     try {
-      // const tx = new Transaction()
+      const tx = new Transaction()
       
-      // Note: Actual usage requires users to provide their own OTW (One-Time-Witness)
-      // This is simplified here, users should deploy a module containing OTW first
-      
-      toast('Token creation requires users to deploy a module containing OTW first')
-      toast('Please refer to documentation for how to create custom tokens')
+      // 调用简化代币工厂创建代币
+      // 参数顺序：registry, name, symbol, decimals, description, icon_url, initial_supply, mintable, clock
+      tx.moveCall({
+        target: `${PACKAGE_ID}::simple_coin_factory::create_simple_coin`,
+        arguments: [
+          tx.object(COIN_REGISTRY_ID),          // registry: &mut SimpleCoinRegistry
+          tx.pure.string(formData.name),         // name: vector<u8>
+          tx.pure.string(formData.symbol),       // symbol: vector<u8>
+          tx.pure.u8(formData.decimals),         // decimals: u8
+          tx.pure.string(formData.description),  // description: vector<u8>
+          tx.pure.string(formData.iconUrl),      // icon_url: vector<u8>
+          tx.pure.u64(totalSupply),              // initial_supply: u64
+          tx.pure.bool(formData.mintable),       // mintable: bool
+          tx.object('0x6'),                      // clock: &Clock
+        ],
+      })
 
-      // Sample code (requires actual OTW):
-      // tx.moveCall({
-      //   target: `${PACKAGE_ID}::coin_factory::create_coin`,
-      //   arguments: [
-      //     tx.object('REGISTRY_ID'),
-      //     tx.pure('WITNESS'),
-      //     tx.pure.u8(formData.decimals),
-      //     tx.pure.string(formData.symbol),
-      //     tx.pure.string(formData.name),
-      //     tx.pure.string(formData.description),
-      //     tx.pure.string(formData.iconUrl),
-      //   ],
-      //   typeArguments: ['YOUR_COIN_TYPE'],
-      // })
-
-      // signAndExecute(
-      //   {
-      //     transaction: tx,
-      //   },
-      //   {
-      //     onSuccess: (result) => {
-      //       toast.success('Token created successfully!')
-      //       console.log('Transaction digest:', result.digest)
-      //       setFormData({
-      //         name: '',
-      //         symbol: '',
-      //         decimals: 9,
-      //         description: '',
-      //         iconUrl: '',
-      //       })
-      //     },
-      //     onError: (error) => {
-      //       toast.error('Creation failed: ' + error.message)
-      //     },
-      //   }
-      // )
+      signAndExecute(
+        {
+          transaction: tx as any,
+        },
+        {
+          onSuccess: (result) => {
+            toast.success('Simple coin created successfully!')
+            console.log('Transaction digest:', result.digest)
+            setFormData({
+              name: '',
+              symbol: '',
+              decimals: 9,
+              totalSupply: '',
+              mintable: false,
+              description: '',
+              iconUrl: '',
+            })
+          },
+          onError: (error) => {
+            toast.error('Creation failed: ' + error.message)
+          },
+        }
+      )
 
     } catch (error: any) {
       toast.error('Creation failed: ' + error.message)
@@ -84,7 +95,7 @@ export default function CreateCoinPage() {
     <div className="max-w-2xl mx-auto">
       <div className="card">
         <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
-          Create New Token
+          Create Simple Coin
         </h1>
         
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -100,6 +111,9 @@ export default function CreateCoinPage() {
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Full name of your token (e.g., Bitcoin, Ethereum)
+            </p>
           </div>
 
           <div>
@@ -114,11 +128,14 @@ export default function CreateCoinPage() {
               onChange={(e) => setFormData({ ...formData, symbol: e.target.value.toUpperCase() })}
               required
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Unique identifier for your token (e.g., BTC, ETH, USDT)
+            </p>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Precision (Decimal Places)
+              Decimals
             </label>
             <input
               type="number"
@@ -126,8 +143,43 @@ export default function CreateCoinPage() {
               min="0"
               max="18"
               value={formData.decimals}
-              onChange={(e) => setFormData({ ...formData, decimals: parseInt(e.target.value) })}
+              onChange={(e) => setFormData({ ...formData, decimals: parseInt(e.target.value) || 0 })}
             />
+            <p className="text-xs text-gray-500 mt-1">
+              Number of decimal places (default: 9, similar to SUI)
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Total Supply *
+            </label>
+            <input
+              type="number"
+              className="input"
+              min="1"
+              placeholder="1000000"
+              value={formData.totalSupply}
+              onChange={(e) => setFormData({ ...formData, totalSupply: e.target.value })}
+              required
+            />
+            <p className="text-xs text-gray-500 mt-1">
+              Total amount of tokens to create (cannot be changed later unless mintable)
+            </p>
+          </div>
+
+          <div>
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.mintable}
+                onChange={(e) => setFormData({ ...formData, mintable: e.target.checked })}
+                className="mr-2 h-4 w-4"
+              />
+              <span className="text-sm text-gray-700 dark:text-gray-300">
+                Make this token mintable (allow creating more tokens in the future)
+              </span>
+            </label>
           </div>
 
           <div>
@@ -168,22 +220,24 @@ export default function CreateCoinPage() {
             )}
           </div>
 
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
-            <h3 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
-              ⚠️ Important Notice
+          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+            <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
+              💡 Simple Coin Features
             </h3>
-            <p className="text-sm text-yellow-700 dark:text-yellow-300">
-              Creating tokens requires deploying a Move module containing OTW (One-Time-Witness) first.
-              Please refer to documentation for detailed steps. This interface is mainly for UI interaction demonstration.
-            </p>
+            <ul className="text-sm text-blue-700 dark:text-blue-300 space-y-1">
+              <li>• No need to deploy Move modules or OTW</li>
+              <li>• Instant creation with just a few clicks</li>
+              <li>• Perfect for testing and simple token scenarios</li>
+              <li>• Can be used directly in auctions</li>
+            </ul>
           </div>
 
           <button
             type="submit"
             className="btn btn-primary w-full"
-            disabled={isLoading}
+            disabled={isLoading || !currentAccount}
           >
-            {isLoading ? 'Creating...' : 'Create Token'}
+            {isLoading ? 'Creating...' : !currentAccount ? 'Connect Wallet First' : 'Create Simple Coin'}
           </button>
         </form>
       </div>
