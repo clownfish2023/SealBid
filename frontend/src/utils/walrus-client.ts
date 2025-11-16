@@ -37,13 +37,25 @@ export class WalrusClient {
 
   /**
    * Upload file to Walrus
+   * Uses PUT /v1/blobs endpoint as per Walrus Publisher API
+   * Reference: https://publisher.walrus-testnet.walrus.space/v1/api#tag/routes/operation/put_blob
    */
   async upload(file: File): Promise<BlobInfo> {
-    const formData = new FormData();
-    formData.append('file', file);
+    // Development mode fallback: use mock blob IDs if Walrus is not available
+    if (import.meta.env.DEV && import.meta.env.VITE_WALRUS_MOCK === 'true') {
+      console.warn('⚠️ Using mock Walrus upload (VITE_WALRUS_MOCK=true)');
+      const mockBlobId = `mock_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+      return {
+        blobId: mockBlobId,
+        size: file.size,
+        contentType: file.type,
+      };
+    }
 
     try {
-      const response = await fetch(`${this.config.publisherEndpoint}/v1/store`, {
+      // Use PUT /v1/blobs endpoint as per Walrus Publisher API
+      // Reference: https://publisher.walrus-testnet.walrus.space/v1/api#tag/routes/operation/put_blob
+      const response = await fetch(`${this.config.publisherEndpoint}/v1/blobs`, {
         method: 'PUT',
         body: file,
         headers: {
@@ -52,18 +64,49 @@ export class WalrusClient {
       });
 
       if (!response.ok) {
-        throw new Error(`Upload failed: ${response.statusText}`);
+        const errorText = await response.text().catch(() => response.statusText);
+        const errorMessage = `Upload failed: ${response.status} ${errorText}`;
+        
+        // Provide helpful error message
+        if (response.status === 404) {
+          console.error('Walrus endpoint not found. Possible issues:');
+          console.error('1. Endpoint URL may be incorrect:', `${this.config.publisherEndpoint}/v1/blobs`);
+          console.error('2. Walrus testnet may be down or endpoint changed');
+          console.error('3. Check Walrus API documentation: https://publisher.walrus-testnet.walrus.space/v1/api');
+          console.error('4. For development, set VITE_WALRUS_MOCK=true to use mock uploads');
+          throw new Error(`${errorMessage}\n\nTip: Check VITE_WALRUS_PUBLISHER environment variable or Walrus API documentation.\nFor development, you can set VITE_WALRUS_MOCK=true to use mock uploads.`);
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const result = await response.json();
       
+      // Handle different response formats
+      // According to Walrus API, response should contain blobId
+      const blobId = result.blobId 
+        || result.id
+        || result.newlyCreated?.blobObject?.blobId 
+        || result.alreadyCertified?.blobId;
+      
+      if (!blobId) {
+        console.warn('Unexpected response format:', result);
+        throw new Error('Invalid response format from Walrus API. Expected blobId in response.');
+      }
+      
       return {
-        blobId: result.newlyCreated?.blobObject?.blobId || result.alreadyCertified?.blobId,
+        blobId,
         size: file.size,
         contentType: file.type,
       };
     } catch (error) {
       console.error('Walrus upload error:', error);
+      
+      // In development, provide fallback suggestion
+      if (import.meta.env.DEV) {
+        console.warn('💡 Development tip: Set VITE_WALRUS_MOCK=true in .env to use mock uploads');
+      }
+      
       throw new Error(`Failed to upload to Walrus: ${error}`);
     }
   }
@@ -293,6 +336,15 @@ export function createWalrusClient(): WalrusClient {
     publisherEndpoint: import.meta.env.VITE_WALRUS_PUBLISHER || 'https://publisher.walrus-testnet.walrus.space',
     network: (import.meta.env.VITE_NETWORK as any) || 'testnet',
   };
+
+  // Log configuration in development
+  if (import.meta.env.DEV) {
+    console.log('Walrus Client Config:', {
+      aggregator: config.aggregatorEndpoint,
+      publisher: config.publisherEndpoint,
+      network: config.network,
+    });
+  }
 
   return new WalrusClient(config);
 }

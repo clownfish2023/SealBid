@@ -6,8 +6,8 @@ export default function Layout() {
 
   const isActive = (path: string) => {
     return location.pathname === path
-      ? 'border-b-2 border-primary-500'
-      : 'hover:text-primary-400'
+      ? 'border-b-2 border-primary-600 text-primary-600 dark:border-primary-400 dark:text-primary-400'
+      : 'hover:text-primary-600 dark:hover:text-primary-400'
   }
 
   return (
@@ -25,7 +25,7 @@ export default function Layout() {
               <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                 <Link
                   to="/"
-                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive(
+                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-700 dark:text-gray-200 ${isActive(
                     '/'
                   )}`}
                 >
@@ -33,7 +33,7 @@ export default function Layout() {
                 </Link>
                 <Link
                   to="/create-coin"
-                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive(
+                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-700 dark:text-gray-200 ${isActive(
                     '/create-coin'
                   )}`}
                 >
@@ -41,7 +41,7 @@ export default function Layout() {
                 </Link>
                 <Link
                   to="/create-project"
-                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive(
+                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-700 dark:text-gray-200 ${isActive(
                     '/create-project'
                   )}`}
                 >
@@ -49,7 +49,7 @@ export default function Layout() {
                 </Link>
                 <Link
                   to="/create-auction"
-                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive(
+                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-700 dark:text-gray-200 ${isActive(
                     '/create-auction'
                   )}`}
                 >
@@ -57,7 +57,7 @@ export default function Layout() {
                 </Link>
                 <Link
                   to="/auctions"
-                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive(
+                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-700 dark:text-gray-200 ${isActive(
                     '/auctions'
                   )}`}
                 >
@@ -65,7 +65,7 @@ export default function Layout() {
                 </Link>
                 <Link
                   to="/history"
-                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium ${isActive(
+                  className={`inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-700 dark:text-gray-200 ${isActive(
                     '/history'
                   )}`}
                 >

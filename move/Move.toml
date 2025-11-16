@@ -9,3 +9,4 @@ Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-fram
 [addresses]
 seal_bid = "0x0"
 my_coin = "0x0"  # User-defined coin module address
+seal_coin = "0x0"  # Seal coin OTW module address

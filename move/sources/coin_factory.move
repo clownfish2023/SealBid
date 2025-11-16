@@ -1,7 +1,7 @@
 // Copyright (c) SealBid
 // SPDX-License-Identifier: Apache-2.0
 
-/// 代币工厂模块 - 允许用户创建自定义代币
+/// Token factory module - Allows users to create custom tokens
 module seal_bid::coin_factory {
     use std::string::{Self, String};
     use std::option;
@@ -10,17 +10,17 @@ module seal_bid::coin_factory {
     use sui::package;
     use sui::display;
 
-    /// 代币信息注册表
+    /// Token info registry
     public struct CoinRegistry has key {
         id: UID,
-        /// 记录所有创建的代币
+        /// Record all created tokens
         coins: vector<address>,
     }
 
     /// One-Time-Witness for the module
     public struct COIN_FACTORY has drop {}
 
-    /// 代币创建事件
+    /// Token creation event
     public struct CoinCreated has copy, drop {
         coin_type: String,
         creator: address,
@@ -29,25 +29,28 @@ module seal_bid::coin_factory {
         decimals: u8,
     }
 
-    /// 初始化函数
+    /// Initialization function
     fun init(otw: COIN_FACTORY, ctx: &mut TxContext) {
-        // 创建并共享代币注册表
+        // Create and share the token registry
         let registry = CoinRegistry {
             id: object::new(ctx),
             coins: vector::empty(),
         };
         transfer::share_object(registry);
 
-        // 创建 Publisher 对象
+        // Create Publisher object
         let publisher = package::claim(otw, ctx);
         transfer::public_transfer(publisher, ctx.sender());
     }
 
-    /// 创建新代币的入口函数
-    /// 这是一个泛型函数，用户需要定义自己的 OTW 类型
+    /// Entry function to create a new token
+    /// This is a generic function; users need to define their own OTW type
+    /// The OTW type must match the module name (for example: seal_coin::seal_coin requires SEAL_COIN)
+    /// Note: The OTW object needs to be created when the module is published, and then passed in as a parameter
+    /// Due to Sui constraints, the OTW cannot be obtained inside the function and must be provided by the caller
     public entry fun create_coin<T: drop>(
         registry: &mut CoinRegistry,
-        witness: T,
+        witness: T,  // OTW object must be passed in as a parameter
         decimals: u8,
         symbol: vector<u8>,
         name: vector<u8>,
@@ -55,7 +58,7 @@ module seal_bid::coin_factory {
         icon_url: vector<u8>,
         ctx: &mut TxContext
     ) {
-        // 创建代币
+        // Create token
         let (treasury_cap, metadata) = coin::create_currency(
             witness,
             decimals,
@@ -66,11 +69,11 @@ module seal_bid::coin_factory {
             ctx
         );
 
-        // 记录代币信息
+        // Record token information
         let coin_address = object::id_address(&metadata);
         registry.coins.push_back(coin_address);
 
-        // 发出事件
+        // Emit event
         sui::event::emit(CoinCreated {
             coin_type: string::utf8(symbol),
             creator: ctx.sender(),
@@ -79,12 +82,12 @@ module seal_bid::coin_factory {
             decimals,
         });
 
-        // 转移 TreasuryCap 和 Metadata 给创建者
+        // Transfer TreasuryCap and Metadata to the creator
         transfer::public_freeze_object(metadata);
         transfer::public_transfer(treasury_cap, ctx.sender());
     }
 
-    /// 铸造代币
+    /// Mint tokens
     public entry fun mint<T>(
         treasury_cap: &mut TreasuryCap<T>,
         amount: u64,
@@ -95,7 +98,7 @@ module seal_bid::coin_factory {
         transfer::public_transfer(coin, recipient);
     }
 
-    /// 销毁代币
+    /// Burn tokens
     public entry fun burn<T>(
         treasury_cap: &mut TreasuryCap<T>,
         coin: coin::Coin<T>
@@ -103,9 +106,9 @@ module seal_bid::coin_factory {
         coin::burn(treasury_cap, coin);
     }
 
-    // === 查询函数 ===
+    // === Query functions ===
 
-    /// 获取注册表中的所有代币
+    /// Get all tokens in registry
     public fun get_all_coins(registry: &CoinRegistry): vector<address> {
         registry.coins
     }

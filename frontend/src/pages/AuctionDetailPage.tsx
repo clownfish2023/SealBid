@@ -85,7 +85,7 @@ export default function AuctionDetailPage() {
 
     try {
       // 1. Encrypt bid using Seal
-      toast('Encrypting bid with Seal...', { icon: '🔒' })
+      toast.info('Encrypting bid...')
       
       // Actual implementation requires Seal SDK encryption
       // import { SealClient } from '@mysten/seal-sdk'

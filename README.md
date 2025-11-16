@@ -205,10 +205,10 @@ public entry fun mint<T>(
 )
 ```
 
-#### auction 模块
+#### auction Module
 
 ```move
-// 创建拍卖
+// Create auction
 public entry fun create_auction<T>(
     treasury_cap: TreasuryCap<T>,
     coin_name: vector<u8>,
@@ -220,7 +220,7 @@ public entry fun create_auction<T>(
     ctx: &mut TxContext
 )
 
-// 提交出价
+// Submit bid
 public entry fun place_bid<T>(
     auction: &mut Auction<T>,
     encrypted_bid_data: vector<u8>,
@@ -229,7 +229,7 @@ public entry fun place_bid<T>(
     ctx: &mut TxContext
 )
 
-// 完成拍卖
+// Finalize auction
 public entry fun finalize_auction<T>(
     auction: &mut Auction<T>,
     clock: &Clock,
@@ -282,26 +282,26 @@ npm run build
 3. **Gas Fees**: All on-chain operations require payment of gas fees
 4. **Time Precision**: Ensure system time is synchronized with blockchain time
 
-## 🔗 相关链接
+## 🔗 Related Links
 
-- [Sui 官网](https://sui.io)
-- [Seal 文档](https://seal-docs.wal.app/)
-- [Sui Move 文档](https://docs.sui.io/guides/developer/first-app/write-package)
-- [TLE 模式参考](https://github.com/MystenLabs/seal/blob/main/move/patterns/sources/tle.move)
+- [Sui Official](https://sui.io)
+- [Seal Documentation](https://seal-docs.wal.app/)
+- [Sui Move Documentation](https://docs.sui.io/guides/developer/first-app/write-package)
+- [TLE Pattern Reference](https://github.com/MystenLabs/seal/blob/main/move/patterns/sources/tle.move)
 
 ## 📄 License
 
 MIT License
 
-## 🤝 贡献
+## 🤝 Contributing
 
-欢迎提交 Issue 和 Pull Request！
+Issues and Pull Requests are welcome!
 
-## 📧 联系方式
+## 📧 Contact
 
-如有问题，请通过 Issue 联系我们。
+For any questions, please contact us through Issues.
 
 ---
 
-**⚡ 由 Sui Seal 驱动，实现真正公平的链上拍卖**
+**⚡ Powered by Sui Seal, enabling truly fair on-chain auctions**
 

@@ -202,7 +202,7 @@ signAndExecute(
 )
 ```
 
-### 使用 Seal 加密
+### Using Seal Encryption
 
 ```tsx
 import { encryptWithSeal } from '@/utils/seal'
@@ -214,9 +214,9 @@ const encrypted = await encryptWithSeal(
 )
 ```
 
-## 🔧 工具函数
+## 🔧 Utility Functions
 
-### 格式化地址
+### Format Address
 
 ```tsx
 import { formatAddress } from '@/utils/format'
@@ -224,7 +224,7 @@ import { formatAddress } from '@/utils/format'
 formatAddress('0x1234567890abcdef') // 0x1234...cdef
 ```
 
-### 格式化数字
+### Format Number
 
 ```tsx
 import { formatNumber } from '@/utils/format'
@@ -232,7 +232,7 @@ import { formatNumber } from '@/utils/format'
 formatNumber(1000000) // 1,000,000
 ```
 
-### 格式化代币数量
+### Format Token Amount
 
 ```tsx
 import { formatTokenAmount } from '@/utils/format'
@@ -240,7 +240,7 @@ import { formatTokenAmount } from '@/utils/format'
 formatTokenAmount('1000000000', 9) // 1
 ```
 
-### SUI 单位转换
+### SUI Unit Conversion
 
 ```tsx
 import { suiToMist, mistToSui } from '@/utils/format'
@@ -249,19 +249,19 @@ suiToMist(1) // 1000000000n
 mistToSui(1000000000n) // "1"
 ```
 
-## 🎯 配置说明
+## 🎯 Configuration Guide
 
 ### constants.ts
 
 ```typescript
-// 合约地址
+// Contract addresses
 export const PACKAGE_ID = '0x...'
 export const SEAL_PACKAGE_ID = '0x...'
 
-// Seal 服务器
+// Seal servers
 export const SEAL_SERVERS = ['0x...', '0x...']
 
-// 拍卖策略
+// Auction strategies
 export const AUCTION_STRATEGIES = {
   TOP_N: 0,
   RANDOM_N: 1,
@@ -269,17 +269,17 @@ export const AUCTION_STRATEGIES = {
 }
 ```
 
-## 🐛 调试
+## 🐛 Debugging
 
-### 查看交易
+### View Transactions
 
 ```typescript
 console.log('Transaction digest:', result.digest)
-// 在 Sui Explorer 中查看
+// View in Sui Explorer
 // https://suiexplorer.com/txblock/<digest>?network=testnet
 ```
 
-### 查看对象
+### View Objects
 
 ```typescript
 const obj = await suiClient.getObject({
@@ -289,50 +289,50 @@ const obj = await suiClient.getObject({
 console.log('Object:', obj)
 ```
 
-## 📦 构建优化
+## 📦 Build Optimization
 
-### 代码分割
+### Code Splitting
 
-Vite 自动进行代码分割，按路由懒加载。
+Vite automatically performs code splitting with route-based lazy loading.
 
-### 资源优化
+### Resource Optimization
 
 ```bash
-# 分析构建产物
+# Analyze build artifacts
 npm run build
-# 查看 dist/ 目录
+# Check dist/ directory
 ```
 
-### 环境变量
+### Environment Variables
 
-生产环境使用 `.env.production`:
+Use `.env.production` for production environment:
 
 ```env
 VITE_NETWORK=mainnet
 VITE_PACKAGE_ID=0x...
 ```
 
-## 🔐 安全建议
+## 🔐 Security Recommendations
 
-1. **永远不要**在前端代码中硬编码私钥
-2. **验证**所有用户输入
-3. **检查**交易参数的合理性
-4. **使用** HTTPS 部署
-5. **定期更新**依赖包
+1. **Never** hardcode private keys in frontend code
+2. **Validate** all user inputs
+3. **Check** reasonableness of transaction parameters
+4. **Use** HTTPS for deployment
+5. **Regularly update** dependency packages
 
-## 📚 学习资源
+## 📚 Learning Resources
 
-- [React 文档](https://react.dev)
-- [TypeScript 文档](https://www.typescriptlang.org)
-- [Vite 文档](https://vitejs.dev)
+- [React Documentation](https://react.dev)
+- [TypeScript Documentation](https://www.typescriptlang.org)
+- [Vite Documentation](https://vitejs.dev)
 - [Tailwind CSS](https://tailwindcss.com)
 - [Sui TypeScript SDK](https://sdk.mystenlabs.com/typescript)
 
-## 🤝 贡献
+## 🤝 Contributing
 
-欢迎提交 PR 改进前端应用！
+Pull requests are welcome to improve the frontend application!
 
-## 📄 许可证
+## 📄 License
 
 MIT License
 

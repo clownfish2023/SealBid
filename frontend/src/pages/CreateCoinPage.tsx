@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useSignAndExecuteTransaction, useSuiClient } from '@mysten/dapp-kit'
 import { Transaction } from '@mysten/sui/transactions'
 import toast from 'react-hot-toast'
-import { PACKAGE_ID, COIN_REGISTRY_ID } from '@/config/constants'
+import { PACKAGE_ID } from '@/config/constants'
 
 export default function CreateCoinPage() {
   const [formData, setFormData] = useState({
@@ -11,8 +11,6 @@ export default function CreateCoinPage() {
     decimals: 9,
     description: '',
     iconUrl: '',
-    otwObjectId: '', // OTW 对象 ID
-    coinType: '', // 代币类型（如：0x123::my_coin::MY_COIN）
   })
   const [isLoading, setIsLoading] = useState(false)
 
@@ -27,114 +25,56 @@ export default function CreateCoinPage() {
       return
     }
 
-    if (!formData.otwObjectId) {
-      toast.error('Please provide OTW Object ID. See documentation for how to create one.', {
-        duration: 6000
-      })
-      return
-    }
-
-    if (!formData.coinType) {
-      toast.error('Please provide Coin Type (e.g., 0x123::my_coin::MY_COIN)', {
-        duration: 6000
-      })
-      return
-    }
-
     setIsLoading(true)
 
     try {
-      // First, we need to get the CoinRegistry object ID
-      // In a real app, this should be stored in constants or fetched from chain
-      toast('Note: You need to provide the CoinRegistry object ID', {
-        icon: 'ℹ️',
-        duration: 4000
-      })
-
-      // For now, we'll show instructions
-      toast('To create a token:', {
-        icon: '📖',
-        duration: 5000
-      })
-      toast('1. Deploy an OTW module (see docs/OTW_TOKEN_CREATION_GUIDE.md)', {
-        icon: '1️⃣',
-        duration: 5000
-      })
-      toast('2. Get the OTW Object ID from deployment output', {
-        icon: '2️⃣',
-        duration: 5000
-      })
-      toast('3. Fill in the form and submit', {
-        icon: '3️⃣',
-        duration: 5000
-      })
-
-      // Get REGISTRY_ID from chain
-      // The CoinRegistry is a shared object created during coin_factory module initialization
-      // We need to query for it or store it in constants
       const tx = new Transaction()
-
-      // Get REGISTRY_ID from constants
-      // CoinRegistry is a shared object created during coin_factory module initialization
-      // To get this ID: Deploy coin_factory module and check "Shared Objects" in deployment output
-      // Then add it to .env as VITE_COIN_REGISTRY_ID
       
-      if (!COIN_REGISTRY_ID || COIN_REGISTRY_ID === '0x0') {
-        toast.error('CoinRegistry ID not configured. Please add VITE_COIN_REGISTRY_ID to .env file', {
-          duration: 8000
-        })
-        toast('To get REGISTRY_ID: Deploy coin_factory module and check "Shared Objects" in output', {
-          icon: 'ℹ️',
-          duration: 8000
-        })
-        setIsLoading(false)
-        return
-      }
+      // Note: Actual usage requires users to provide their own OTW (One-Time-Witness)
+      // This is simplified here, users should deploy a module containing OTW first
+      
+      toast.info('Token creation requires users to deploy a module containing OTW first')
+      toast.info('Please refer to documentation for how to create custom tokens')
 
-      tx.moveCall({
-        target: `${PACKAGE_ID}::coin_factory::create_coin`,
-        arguments: [
-          tx.object(COIN_REGISTRY_ID),
-          tx.object(formData.otwObjectId), // OTW 对象
-          tx.pure.u8(formData.decimals),
-          tx.pure.string(formData.symbol),
-          tx.pure.string(formData.name),
-          tx.pure.string(formData.description || ''),
-          tx.pure.string(formData.iconUrl || ''),
-        ],
-        typeArguments: [formData.coinType], // 如：0x123::my_coin::MY_COIN
-      })
+      // Sample code (requires actual OTW):
+      // tx.moveCall({
+      //   target: `${PACKAGE_ID}::coin_factory::create_coin`,
+      //   arguments: [
+      //     tx.object('REGISTRY_ID'),
+      //     tx.pure('WITNESS'),
+      //     tx.pure.u8(formData.decimals),
+      //     tx.pure.string(formData.symbol),
+      //     tx.pure.string(formData.name),
+      //     tx.pure.string(formData.description),
+      //     tx.pure.string(formData.iconUrl),
+      //   ],
+      //   typeArguments: ['YOUR_COIN_TYPE'],
+      // })
 
-      signAndExecute(
-        {
-          transaction: tx,
-        },
-        {
-          onSuccess: (result) => {
-            toast.success('Token created successfully!')
-            console.log('Transaction digest:', result.digest)
-            console.log('Created TreasuryCap and CoinMetadata objects')
-            
-            setFormData({
-              name: '',
-              symbol: '',
-              decimals: 9,
-              description: '',
-              iconUrl: '',
-              otwObjectId: '',
-              coinType: '',
-            })
-          },
-          onError: (error) => {
-            toast.error('Creation failed: ' + error.message)
-            console.error('Error details:', error)
-          },
-        }
-      )
+      // signAndExecute(
+      //   {
+      //     transaction: tx,
+      //   },
+      //   {
+      //     onSuccess: (result) => {
+      //       toast.success('Token created successfully!')
+      //       console.log('Transaction digest:', result.digest)
+      //       setFormData({
+      //         name: '',
+      //         symbol: '',
+      //         decimals: 9,
+      //         description: '',
+      //         iconUrl: '',
+      //       })
+      //     },
+      //     onError: (error) => {
+      //       toast.error('Creation failed: ' + error.message)
+      //     },
+      //   }
+      // )
 
     } catch (error: any) {
       toast.error('Creation failed: ' + error.message)
-      console.error('Error:', error)
     } finally {
       setIsLoading(false)
     }
@@ -228,61 +168,14 @@ export default function CreateCoinPage() {
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              OTW Object ID *
-            </label>
-            <input
-              type="text"
-              className="input"
-              placeholder="0x..."
-              value={formData.otwObjectId}
-              onChange={(e) => setFormData({ ...formData, otwObjectId: e.target.value })}
-              required
-            />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Get this from deploying an OTW module. See documentation for details.
-            </p>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Coin Type *
-            </label>
-            <input
-              type="text"
-              className="input"
-              placeholder="0x123::my_coin::MY_COIN"
-              value={formData.coinType}
-              onChange={(e) => setFormData({ ...formData, coinType: e.target.value })}
-              required
-            />
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Format: 0x&lt;PACKAGE_ID&gt;::&lt;MODULE&gt;::&lt;TYPE&gt;
-            </p>
-          </div>
-
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
-            <h3 className="font-semibold text-blue-800 dark:text-blue-200 mb-2">
-              📖 How to Create a Token
+          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg p-4">
+            <h3 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
+              ⚠️ Important Notice
             </h3>
-            <ol className="text-sm text-blue-700 dark:text-blue-300 space-y-2 list-decimal list-inside">
-              <li>Deploy an OTW module (see <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">docs/OTW_TOKEN_CREATION_GUIDE.md</code>)</li>
-              <li>Get the OTW Object ID from the deployment output</li>
-              <li>Fill in the form above with your token details</li>
-              <li>Enter the OTW Object ID and Coin Type</li>
-              <li>Submit to create your token</li>
-            </ol>
-            <div className="mt-3">
-              <a
-                href="/docs/OTW_TOKEN_CREATION_GUIDE.md"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-              >
-                📚 View Complete Guide →
-              </a>
-            </div>
+            <p className="text-sm text-yellow-700 dark:text-yellow-300">
+              Creating tokens requires deploying a Move module containing OTW (One-Time-Witness) first.
+              Please refer to documentation for detailed steps. This interface is mainly for UI interaction demonstration.
+            </p>
           </div>
 
           <button

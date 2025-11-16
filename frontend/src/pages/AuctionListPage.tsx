@@ -29,36 +29,104 @@ export default function AuctionListPage() {
   const loadAuctions = async () => {
     try {
       setIsLoading(true)
-      // Query all auction objects
-      // Note: Actual implementation needs to adjust query logic based on contract requirements
-      
-      // Sample data (should be queried from chain in production)
-      const mockAuctions: Auction[] = [
-        {
-          id: '0x123...',
-          coinName: 'Test Token',
-          totalSupply: '1000000',
-          winnerCount: '10',
-          strategy: 0,
-          startTime: Date.now() - 3600000,
-          endTime: Date.now() + 3600000,
-          finalized: false,
-          bidCount: 5,
-        },
-        {
-          id: '0x456...',
-          coinName: 'Another Token',
-          totalSupply: '500000',
-          winnerCount: '5',
-          strategy: 1,
-          startTime: Date.now() - 7200000,
-          endTime: Date.now() - 1800000,
-          finalized: true,
-          bidCount: 12,
-        },
-      ]
+      const allAuctions: Auction[] = []
 
-      setAuctions(mockAuctions)
+      // Query events to get all created auctions
+      // Query standard auction creation events
+      try {
+        const standardEvents = await suiClient.queryEvents({
+          query: {
+            MoveEventType: `${PACKAGE_ID}::auction::AuctionCreated`,
+          },
+          limit: 50,
+          order: 'descending',
+        })
+
+        for (const event of standardEvents.data) {
+          if (event.parsedJson) {
+            const data = event.parsedJson as any
+            const auctionId = data.auction_id
+            
+            // Get auction object details
+            try {
+              const auctionObj = await suiClient.getObject({
+                id: auctionId,
+                options: { showContent: true },
+              })
+
+              if (auctionObj.data?.content && 'fields' in auctionObj.data.content) {
+                const fields = auctionObj.data.content.fields as any
+                allAuctions.push({
+                  id: auctionId,
+                  coinName: fields.coin_name || data.coin_name || 'Unknown',
+                  totalSupply: fields.total_supply || data.total_supply || '0',
+                  winnerCount: fields.winner_count || data.winner_count || '0',
+                  strategy: parseInt(fields.strategy || data.strategy || '0'),
+                  startTime: parseInt(fields.start_time || data.start_time || '0'),
+                  endTime: parseInt(fields.end_time || data.end_time || '0'),
+                  finalized: fields.finalized || false,
+                  bidCount: fields.encrypted_bids ? fields.encrypted_bids.length : 0,
+                })
+              }
+            } catch (err) {
+              console.warn(`Failed to fetch auction ${auctionId}:`, err)
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to load standard auction events:', error)
+      }
+
+      // Query simple token auction creation events
+      try {
+        const simpleEvents = await suiClient.queryEvents({
+          query: {
+            MoveEventType: `${PACKAGE_ID}::simple_auction::SimpleAuctionCreated`,
+          },
+          limit: 50,
+          order: 'descending',
+        })
+
+        for (const event of simpleEvents.data) {
+          if (event.parsedJson) {
+            const data = event.parsedJson as any
+            const auctionId = data.auction_id
+            
+            // Get auction object details
+            try {
+              const auctionObj = await suiClient.getObject({
+                id: auctionId,
+                options: { showContent: true },
+              })
+
+              if (auctionObj.data?.content && 'fields' in auctionObj.data.content) {
+                const fields = auctionObj.data.content.fields as any
+                allAuctions.push({
+                  id: auctionId,
+                  coinName: fields.coin_symbol || data.coin_symbol || 'Unknown',
+                  totalSupply: fields.total_supply || data.total_supply || '0',
+                  winnerCount: fields.winner_count || data.winner_count || '0',
+                  strategy: parseInt(fields.strategy || data.strategy || '0'),
+                  startTime: parseInt(fields.start_time || data.start_time || '0'),
+                  endTime: parseInt(fields.end_time || data.end_time || '0'),
+                  finalized: fields.finalized || false,
+                  bidCount: fields.encrypted_bids ? fields.encrypted_bids.length : 0,
+                })
+              }
+            } catch (err) {
+              console.warn(`Failed to fetch simple auction ${auctionId}:`, err)
+            }
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to load simple auction events:', error)
+      }
+
+      // Sort by start time descending (latest first)
+      allAuctions.sort((a, b) => b.startTime - a.startTime)
+
+      setAuctions(allAuctions)
+      console.log(`Loaded ${allAuctions.length} auctions (${allAuctions.filter(a => !a.finalized).length} active)`)
     } catch (error) {
       console.error('Failed to load auctions:', error)
     } finally {
@@ -119,9 +187,18 @@ export default function AuctionListPage() {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
           Auction List
         </h1>
-        <Link to="/create-auction" className="btn btn-primary">
-          Create Auction
-        </Link>
+        <div className="flex space-x-2">
+          <button
+            onClick={loadAuctions}
+            className="btn bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+            disabled={isLoading}
+          >
+            {isLoading ? 'Loading...' : '🔄 Refresh'}
+          </button>
+          <Link to="/create-auction" className="btn btn-primary">
+            Create Auction
+          </Link>
+        </div>
       </div>
 
       {/* Filter */}
@@ -161,7 +238,14 @@ export default function AuctionListPage() {
       {/* Auction List */}
       {filteredAuctions.length === 0 ? (
         <div className="card text-center py-12">
-          <p className="text-gray-500 dark:text-gray-400">No auctions available</p>
+          <p className="text-gray-500 dark:text-gray-400">
+            {isLoading ? 'Loading...' : 'No auctions'}
+          </p>
+          {!isLoading && (
+            <Link to="/create-auction" className="mt-4 inline-block text-primary-600 hover:underline">
+              Create the first auction →
+            </Link>
+          )}
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

@@ -5,6 +5,23 @@ import toast from 'react-hot-toast'
 import { PACKAGE_ID } from '@/config/constants'
 import { createProjectMetadataManager } from '@/utils/walrus-client'
 
+/**
+ * Convert hex string to byte array (browser-compatible)
+ */
+function hexToBytes(hex: string): number[] {
+  // Remove '0x' prefix if present
+  const cleanHex = hex.startsWith('0x') ? hex.slice(2) : hex
+  
+  // Ensure even length
+  const paddedHex = cleanHex.length % 2 === 0 ? cleanHex : '0' + cleanHex
+  
+  const bytes: number[] = []
+  for (let i = 0; i < paddedHex.length; i += 2) {
+    bytes.push(parseInt(paddedHex.substring(i, i + 2), 16))
+  }
+  return bytes
+}
+
 export default function CreateProjectPage() {
   const [formData, setFormData] = useState({
     name: '',
@@ -121,7 +138,7 @@ export default function CreateProjectPage() {
           target: `${PACKAGE_ID}::project_metadata::update_icon`,
           arguments: [
             updateTx.object(result),
-            updateTx.pure(Array.from(Buffer.from(uploadResult.iconBlob.blobId, 'hex'))),
+            updateTx.pure.vector('u8', hexToBytes(uploadResult.iconBlob.blobId)),
             updateTx.pure.u64(uploadResult.iconBlob.size),
             updateTx.pure.string(uploadResult.iconBlob.contentType),
             updateTx.object('0x6'), // Clock
@@ -135,7 +152,7 @@ export default function CreateProjectPage() {
           target: `${PACKAGE_ID}::project_metadata::update_whitepaper`,
           arguments: [
             updateTx.object(result),
-            updateTx.pure(Array.from(Buffer.from(uploadResult.whitepaperBlob.blobId, 'hex'))),
+            updateTx.pure.vector('u8', hexToBytes(uploadResult.whitepaperBlob.blobId)),
             updateTx.pure.u64(uploadResult.whitepaperBlob.size),
             updateTx.object('0x6'), // Clock
           ],
@@ -148,7 +165,7 @@ export default function CreateProjectPage() {
           target: `${PACKAGE_ID}::project_metadata::update_video`,
           arguments: [
             updateTx.object(result),
-            updateTx.pure(Array.from(Buffer.from(uploadResult.videoBlob.blobId, 'hex'))),
+            updateTx.pure.vector('u8', hexToBytes(uploadResult.videoBlob.blobId)),
             updateTx.pure.u64(uploadResult.videoBlob.size),
             updateTx.pure.string(uploadResult.videoBlob.contentType),
             updateTx.object('0x6'), // Clock
@@ -161,7 +178,7 @@ export default function CreateProjectPage() {
         target: `${PACKAGE_ID}::project_metadata::update_description`,
         arguments: [
           updateTx.object(result),
-          updateTx.pure(Array.from(Buffer.from(uploadResult.metadataBlob.blobId, 'hex'))),
+          updateTx.pure.vector('u8', hexToBytes(uploadResult.metadataBlob.blobId)),
           updateTx.pure.u64(uploadResult.metadataBlob.size),
           updateTx.object('0x6'), // Clock
         ],

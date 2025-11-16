@@ -1,7 +1,7 @@
 // Copyright (c) SealBid
 // SPDX-License-Identifier: Apache-2.0
 
-/// 隐私拍卖模块 - 使用 Seal 时间锁加密实现盲拍
+/// Privacy auction module - Implements blind bidding using Seal time-lock encryption
 module seal_bid::auction {
     use std::string::String;
     use sui::coin::{Self, Coin, TreasuryCap};
@@ -11,7 +11,7 @@ module seal_bid::auction {
     use sui::bcs;
     use sui::event;
 
-    /// 错误码
+    /// Error codes
     const EAuctionNotStarted: u64 = 1;
     const EAuctionEnded: u64 = 2;
     const EAuctionNotEnded: u64 = 3;
@@ -20,55 +20,55 @@ module seal_bid::auction {
     const EInvalidBid: u64 = 6;
     const EInvalidStrategy: u64 = 7;
 
-    /// 拍卖策略
-    const STRATEGY_TOP_N: u8 = 0;        // 出价最高的前 N 个
-    const STRATEGY_RANDOM_N: u8 = 1;      // 随机选 N 个
-    const STRATEGY_CLOSEST_TO_AVG: u8 = 2; // 最接近平均值的 N 个
+    /// Auction strategies
+    const STRATEGY_TOP_N: u8 = 0;        // Top N highest bids
+    const STRATEGY_RANDOM_N: u8 = 1;      // Randomly select N
+    const STRATEGY_CLOSEST_TO_AVG: u8 = 2; // N bids closest to the average
 
-    /// 拍卖对象
+    /// Auction object
     public struct Auction<phantom T> has key {
         id: UID,
-        /// 创建者
+        /// Creator
         creator: address,
-        /// 拍卖的代币类型名称
+        /// Coin type name for the auctioned token
         coin_name: String,
-        /// 总供应量（要拍卖的代币数量）
+        /// Total supply (number of tokens to auction)
         total_supply: u64,
-        /// 中标者数量
+        /// Number of winners
         winner_count: u64,
-        /// 拍卖策略
+        /// Auction strategy
         strategy: u8,
-        /// 开始时间（毫秒）
+        /// Start time (milliseconds)
         start_time: u64,
-        /// 结束时间（毫秒）
+        /// End time (milliseconds)
         end_time: u64,
-        /// 加密的出价列表（用户地址 -> 加密出价数据）
+        /// Encrypted bids list (user address -> encrypted bid data)
         encrypted_bids: vector<EncryptedBid>,
-        /// 支付池（用于退款）
+        /// Payment pool (for refunds)
         payment_pool: Balance<SUI>,
-        /// 是否已经完成
+        /// Whether finalized
         finalized: bool,
-        /// TreasuryCap 用于铸造代币
+        /// TreasuryCap used to mint tokens
         treasury_cap: TreasuryCap<T>,
     }
 
-    /// 加密的出价
+    /// Encrypted bid
     public struct EncryptedBid has store, drop, copy {
         bidder: address,
-        /// Seal 加密的出价数据（包含出价金额）
+        /// Seal encrypted bid data (contains bid amount)
         encrypted_data: vector<u8>,
-        /// 支付的 SUI 金额（用于验证和退款）
+        /// SUI amount paid (for validation and refund)
         payment_amount: u64,
     }
 
-    /// 出价信息（解密后）
+    /// Bid info
     public struct BidInfo has store, drop, copy {
         bidder: address,
         bid_amount: u64,
         payment_amount: u64,
     }
 
-    /// 拍卖创建事件
+    /// Auction created event
     public struct AuctionCreated has copy, drop {
         auction_id: ID,
         creator: address,
@@ -80,20 +80,20 @@ module seal_bid::auction {
         end_time: u64,
     }
 
-    /// 出价事件
+    /// Bid placed event
     public struct BidPlaced has copy, drop {
         auction_id: ID,
         bidder: address,
         payment_amount: u64,
     }
 
-    /// 拍卖完成事件
+    /// Auction finalized event
     public struct AuctionFinalized has copy, drop {
         auction_id: ID,
         winner_count: u64,
     }
 
-    /// 创建新的拍卖
+    /// Create new auction
     public entry fun create_auction<T>(
         treasury_cap: TreasuryCap<T>,
         coin_name: vector<u8>,
@@ -138,7 +138,7 @@ module seal_bid::auction {
         transfer::share_object(auction);
     }
 
-    /// 提交加密的出价
+    /// Place encrypted bid
     public entry fun place_bid<T>(
         auction: &mut Auction<T>,
         encrypted_bid_data: vector<u8>,
@@ -154,7 +154,7 @@ module seal_bid::auction {
         let payment_amount = coin::value(&payment);
         let payment_balance = coin::into_balance(payment);
 
-        // 存储加密的出价
+        // Store encrypted bid
         let bid = EncryptedBid {
             bidder: ctx.sender(),
             encrypted_data: encrypted_bid_data,
@@ -171,8 +171,8 @@ module seal_bid::auction {
         });
     }
 
-    /// 完成拍卖并分配代币
-    /// 注意：实际应用中需要通过 Seal 解密出价，这里简化处理
+    /// Complete auction and allocate tokens
+    /// Note: In real applications, bids should be decrypted via Seal; simplified here
     public entry fun finalize_auction<T>(
         auction: &mut Auction<T>,
         clock: &Clock,
@@ -191,7 +191,7 @@ module seal_bid::auction {
         });
     }
 
-    /// 分配代币给中标者
+    /// Allocate tokens to winners
     public entry fun distribute_tokens<T>(
         auction: &mut Auction<T>,
         winner: address,
@@ -205,7 +205,7 @@ module seal_bid::auction {
         transfer::public_transfer(coin, winner);
     }
 
-    /// 退款给未中标者
+    /// Refund to losers
     public entry fun refund<T>(
         auction: &mut Auction<T>,
         recipient: address,
@@ -220,21 +220,21 @@ module seal_bid::auction {
         transfer::public_transfer(refund_coin, recipient);
     }
 
-    // === Seal 访问策略函数 ===
+    // === Seal access policy functions ===
     
-    /// Seal 访问策略：只有在拍卖结束时间后才能解密
-    /// id 格式：[auction_id][end_time]
+    /// Seal access policy: decryption only allowed after auction end time
+    /// id format: [auction_id][end_time]
     entry fun seal_approve(id: vector<u8>, c: &Clock) {
         let mut bcs_data = bcs::new(id);
         let end_time = bcs::peel_u64(&mut bcs_data);
         let leftovers = bcs::into_remainder_bytes(bcs_data);
 
-        // 检查时间是否已到
+        // Check whether the time has arrived
         assert!(leftovers.length() == 0, 0);
         assert!(clock::timestamp_ms(c) >= end_time, 0);
     }
 
-    // === 查询函数 ===
+    // === Query functions ===
 
     public fun get_auction_info<T>(auction: &Auction<T>): (String, u64, u64, u8, u64, u64, bool) {
         (

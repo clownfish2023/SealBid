@@ -41,55 +41,118 @@ export default function EnhancedAuctionDetailPage() {
   const [bidAmount, setBidAmount] = useState('')
   const [paymentAmount, setPaymentAmount] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [refreshKey, setRefreshKey] = useState(0)
 
   const { mutate: signAndExecute } = useSignAndExecuteTransaction()
   const suiClient = useSuiClient()
   const walrusClient = createWalrusClient()
   const metadataManager = createProjectMetadataManager()
 
-  useEffect(() => {
-    loadAuctionDetail()
-  }, [id])
-
-  const loadAuctionDetail = async () => {
-    try {
-      setIsLoading(true)
-      
-      // Load auction from chain
-      // Mock data for demo
-      const mockAuction: AuctionDetail = {
-        id: id || '0x123',
-        creator: '0xabc',
-        projectMetadataId: '0xdef',
-        coinName: 'Test Token',
-        totalSupply: '1000000',
-        winnerCount: '10',
-        strategy: 0,
-        startTime: Date.now() - 3600000,
-        endTime: Date.now() + 3600000,
-        finalized: false,
-        bidCount: 5,
-      }
-      setAuction(mockAuction)
-
-      // Load project metadata from Walrus
-      // In real implementation, fetch from chain first to get blob ID
-      const mockMetadata: ProjectMetadata = {
-        name: 'Amazing Project',
-        symbol: 'AMZG',
-        description: 'A revolutionary blockchain project...',
-        website: 'https://example.com',
-        twitter: '@amazing',
-      }
-      setProjectMetadata(mockMetadata)
-
-    } catch (error) {
-      console.error('Failed to load auction:', error)
-      toast.error('Failed to load auction details')
-    } finally {
-      setIsLoading(false)
-    }
+  const refreshAuction = () => {
+    setRefreshKey(prev => prev + 1)
   }
+
+  useEffect(() => {
+    const loadAuctionDetail = async () => {
+      if (!id) {
+        setIsLoading(false)
+        return
+      }
+
+      try {
+        setIsLoading(true)
+        
+        console.log('Loading auction details, ID:', id)
+        
+        // Fetch auction object from chain
+        const auctionObj = await suiClient.getObject({
+          id,
+          options: { showContent: true, showOwner: true },
+        })
+
+        console.log('Fetched auction object:', auctionObj)
+
+        if (!auctionObj.data || !auctionObj.data.content || !('fields' in auctionObj.data.content)) {
+          throw new Error('Auction object does not exist or is improperly formatted')
+        }
+
+        const fields = auctionObj.data.content.fields as any
+        
+        console.log('Auction object fields:', fields)
+        
+        // Support standard auction and simple auction
+        const coinName = fields.coin_name || fields.coin_symbol || 'Unknown'
+        const projectMetadataId = fields.project_metadata_id || ''
+        
+        const auctionDetail: AuctionDetail = {
+          id,
+          creator: fields.creator,
+          projectMetadataId,
+          coinName,
+          totalSupply: fields.total_supply || '0',
+          winnerCount: fields.winner_count || '0',
+          strategy: parseInt(fields.strategy || '0'),
+          startTime: parseInt(fields.start_time || '0'),
+          endTime: parseInt(fields.end_time || '0'),
+          finalized: fields.finalized || false,
+          bidCount: fields.encrypted_bids ? fields.encrypted_bids.length : 0,
+        }
+
+        console.log('Parsed auction details:', auctionDetail)
+        setAuction(auctionDetail)
+
+        // Load project metadata (if available)
+        if (projectMetadataId) {
+          try {
+            const projectObj = await suiClient.getObject({
+              id: projectMetadataId,
+              options: { showContent: true },
+            })
+
+            if (projectObj.data?.content && 'fields' in projectObj.data.content) {
+              const projectFields = projectObj.data.content.fields as any
+              
+              const metadata: ProjectMetadata = {
+                name: projectFields.name || coinName,
+                symbol: projectFields.symbol || coinName,
+                description: projectFields.description || '',
+                website: projectFields.website || '',
+                twitter: projectFields.twitter || '',
+                telegram: projectFields.telegram || '',
+                // TODO: Load icon, whitepaper, video from Walrus
+              }
+
+              console.log('Project metadata:', metadata)
+              setProjectMetadata(metadata)
+            }
+          } catch (err) {
+            console.warn('Failed to load project metadata:', err)
+            // Use default metadata
+            setProjectMetadata({
+              name: coinName,
+              symbol: coinName,
+              description: '',
+            })
+          }
+        } else {
+          // No project metadata, use auction info
+          setProjectMetadata({
+            name: coinName,
+            symbol: coinName,
+            description: '',
+          })
+        }
+
+      } catch (error: any) {
+        console.error('Failed to load auction:', error)
+        toast.error('Failed to load auction details: ' + error.message)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadAuctionDetail()
+  }, [id, suiClient, refreshKey])
 
   const handlePlaceBid = async () => {
     if (!auction || !currentAccount) {
@@ -99,6 +162,29 @@ export default function EnhancedAuctionDetailPage() {
 
     if (!bidAmount || !paymentAmount) {
       toast.error('Please fill in bid amount and payment amount')
+      return
+    }
+
+    const bidAmountNum = parseFloat(bidAmount)
+    const paymentAmountNum = parseFloat(paymentAmount)
+
+    if (isNaN(bidAmountNum) || bidAmountNum <= 0) {
+      toast.error('Bid amount must be greater than 0')
+      return
+    }
+
+    if (isNaN(paymentAmountNum) || paymentAmountNum <= 0) {
+      toast.error('Payment amount must be greater than 0')
+      return
+    }
+
+    const now = Date.now()
+    if (now < auction.startTime) {
+      toast.error('Auction has not started yet')
+      return
+    }
+    if (now >= auction.endTime) {
+      toast.error('Auction has ended')
       return
     }
 
@@ -113,19 +199,29 @@ export default function EnhancedAuctionDetailPage() {
       // Submit transaction
       const tx = new Transaction()
 
+      // Split SUI for payment (convert to MIST: 1 SUI = 1,000,000,000 MIST)
+      const paymentInMist = Math.floor(paymentAmountNum * 1000000000)
       const [coin] = tx.splitCoins(tx.gas, [
-        tx.pure.u64(parseInt(paymentAmount) * 1000000000),
+        tx.pure.u64(paymentInMist),
       ])
+      
+      // Set reasonable gas budget: base fee + buffer for payment amount
+      // Base gas: 10,000,000 MIST (0.01 SUI)
+      // Extra buffer: payment amount * 0.1 (for coin split, etc.)
+      const baseGas = 10000000 // 0.01 SUI
+      const bufferGas = Math.max(paymentInMist * 0.1, 5000000) // at least 0.005 SUI
+      const totalGasBudget = Math.floor(baseGas + bufferGas)
+      tx.setGasBudget(totalGasBudget)
 
+      // Use simplified token auction
       tx.moveCall({
-        target: `${PACKAGE_ID}::enhanced_auction::place_bid`,
+        target: `${PACKAGE_ID}::simple_auction::place_simple_bid`,
         arguments: [
           tx.object(auction.id),
-          tx.pure(Array.from(encryptedBidData)),
+          tx.pure.vector('u8', Array.from(encryptedBidData)), // specify vector<u8> type
           coin,
           tx.object('0x6'),
         ],
-        typeArguments: ['YOUR_COIN_TYPE'],
       })
 
       signAndExecute(
@@ -136,7 +232,7 @@ export default function EnhancedAuctionDetailPage() {
             console.log('Transaction digest:', result.digest)
             setBidAmount('')
             setPaymentAmount('')
-            loadAuctionDetail()
+            refreshAuction()
           },
           onError: (error) => {
             toast.error('Bid failed: ' + error.message)
@@ -147,6 +243,38 @@ export default function EnhancedAuctionDetailPage() {
       toast.error('Bid failed: ' + error.message)
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  const handleFinalizeAuction = async () => {
+    if (!auction || !currentAccount) return
+
+    try {
+      const tx = new Transaction()
+
+      tx.moveCall({
+        target: `${PACKAGE_ID}::simple_auction::finalize_simple_auction`,
+        arguments: [
+          tx.object(auction.id),
+          tx.object(import.meta.env.VITE_COIN_REGISTRY_ID || '0x0'), // SimpleCoinRegistry
+          tx.object('0x6'), // Clock object
+        ],
+      })
+
+      signAndExecute(
+        { transaction: tx },
+        {
+          onSuccess: () => {
+            toast.success('Auction completed!')
+            refreshAuction()
+          },
+          onError: (error) => {
+            toast.error('Operation failed: ' + error.message)
+          },
+        }
+      )
+    } catch (error: any) {
+      toast.error('Operation failed: ' + error.message)
     }
   }
 
@@ -321,52 +449,95 @@ export default function EnhancedAuctionDetailPage() {
           </div>
         </div>
 
-        {/* Bid Form */}
+        {/* Bid Form or Finalize Section */}
         <div className="card">
-          <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
-            Submit Bid
-          </h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Bid Amount (Token Quantity)
-              </label>
-              <input
-                type="number"
-                className="input"
-                placeholder="Enter amount"
-                value={bidAmount}
-                onChange={(e) => setBidAmount(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Payment Amount (SUI)
-              </label>
-              <input
-                type="number"
-                className="input"
-                placeholder="Deposit amount"
-                value={paymentAmount}
-                onChange={(e) => setPaymentAmount(e.target.value)}
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                Refunded if not selected
-              </p>
-            </div>
-            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
-              <p className="text-sm text-blue-700 dark:text-blue-300">
-                🔒 Your bid will be encrypted with Seal time-lock and revealed after auction ends
-              </p>
-            </div>
-            <button
-              onClick={handlePlaceBid}
-              className="btn btn-primary w-full"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit Bid'}
-            </button>
-          </div>
+          {Date.now() < auction.endTime && !auction.finalized ? (
+            // Active auction - show bid form
+            <>
+              <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+                Submit Bid
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Bid Amount (Token Quantity)
+                  </label>
+                  <input
+                    type="number"
+                    className="input"
+                    placeholder="Enter amount"
+                    value={bidAmount}
+                    onChange={(e) => setBidAmount(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Payment Amount (SUI)
+                  </label>
+                  <input
+                    type="number"
+                    className="input"
+                    placeholder="Deposit amount"
+                    value={paymentAmount}
+                    onChange={(e) => setPaymentAmount(e.target.value)}
+                  />
+                  <p className="text-sm text-gray-500 mt-1">
+                    Refunded if not selected
+                  </p>
+                </div>
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                  <p className="text-sm text-blue-700 dark:text-blue-300">
+                    🔒 Your bid will be encrypted with Seal time-lock and revealed after auction ends
+                  </p>
+                </div>
+                <button
+                  onClick={handlePlaceBid}
+                  className="btn btn-primary w-full"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Submitting...' : 'Submit Bid'}
+                </button>
+              </div>
+            </>
+          ) : (
+            // Auction ended or finalized
+            <>
+              <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">
+                {auction.finalized ? 'Auction Completed' : 'Auction Ended'}
+              </h2>
+              {auction.finalized ? (
+                <div className="text-center py-6">
+                  <p className="text-gray-600 dark:text-gray-400">
+                    This auction has been completed and tokens have been distributed.
+                  </p>
+                </div>
+              ) : currentAccount?.address === auction.creator ? (
+                <div className="space-y-4">
+                  <p className="text-gray-600 dark:text-gray-400">
+                    The auction has ended with {auction.bidCount} bid(s). You can now finalize the auction to distribute tokens to winners.
+                  </p>
+                  <button
+                    onClick={handleFinalizeAuction}
+                    className="btn btn-primary w-full"
+                  >
+                    Finalize Auction & Distribute Tokens
+                  </button>
+                </div>
+              ) : (
+                <div className="text-center py-6">
+                  <p className="text-gray-600 dark:text-gray-400">
+                    This auction has ended. Waiting for the creator to finalize and distribute tokens.
+                  </p>
+                  {currentAccount && (
+                    <p className="text-xs text-gray-500 dark:text-gray-500 mt-4">
+                      Connected: {currentAccount.address.slice(0, 6)}...{currentAccount.address.slice(-4)}<br />
+                      Creator: {auction.creator.slice(0, 6)}...{auction.creator.slice(-4)}
+                    </p>
+                  )}
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>
